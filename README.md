@@ -1,8 +1,6 @@
 # Prodinfos Skills
 
-Public Agent Skills pack for Prodinfos.
-
-This repository is intended to be mirrored from the private product monorepo and consumed by Agent Skills-compatible clients such as Codex, Claude Code, and OpenClaw.
+Installable Agent Skills for tenant developers integrating Prodinfos analytics.
 
 ## Install
 
@@ -16,6 +14,12 @@ Install the TypeScript SDK integration skill:
 
 ```bash
 npx skills add wotaso/prodinfos-skills --skill prodinfos-ts-sdk
+```
+
+Install the docs voice skill for tenant-facing wording checks:
+
+```bash
+npx skills add wotaso/prodinfos-skills --skill tenant-developer-docs
 ```
 
 If you want both, run both commands.
@@ -33,6 +37,13 @@ npx -y clawhub install prodinfos-ts-sdk
 | --- | --- | --- |
 | `prodinfos-cli` | Query analytics, validate instrumentation, export bounded data | `@prodinfos/cli` `^0.1.0` |
 | `prodinfos-ts-sdk` | Integrate or upgrade the JS/TS SDK in web, React Native, or Expo apps | `@prodinfos/sdk-ts` `>=0.1.0-preview.0 <0.2.0` |
+| `tenant-developer-docs` | Keep docs and README language tenant-developer focused | `n/a` |
+
+## Writing Perspective
+
+- Tenant-facing instructions should be written from the tenant developer perspective.
+- Prefer wording like `your app`, `your workspace`, and `your project`.
+- Avoid provider-centric phrasing such as `our SaaS dashboard`.
 
 ## Repo Layout
 
@@ -44,9 +55,11 @@ npx -y clawhub install prodinfos-ts-sdk
 ├── prodinfos-cli/
 │   ├── SKILL.md
 │   └── references/
-└── prodinfos-ts-sdk/
-    ├── SKILL.md
-    └── references/
+├── prodinfos-ts-sdk/
+│   ├── SKILL.md
+│   └── references/
+└── tenant-developer-docs/
+    └── SKILL.md
 ```
 
 ## Versioning Policy
@@ -73,5 +86,4 @@ pnpm skills:sync:clawhub -- --all --tags latest
 ## Support Model
 
 - Open issues in the public repo for install problems or unclear instructions.
-- Product code still lives in the main Prodinfos monorepo.
-- Mirror pushes can overwrite direct edits in the public repo, so discuss larger changes before opening a PR.
+- Product code and source content are maintained in the Prodinfos monorepo and synced to this public package.

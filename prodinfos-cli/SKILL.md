@@ -36,6 +36,7 @@ See [Versioning Notes](references/versioning.md).
 - Prefer high-level query endpoints over raw exports.
 - Keep groupings and result sets bounded.
 - Treat release-only data as the default.
+- For generated docs or help text, use tenant developer voice (`your workspace`, `your project`) and avoid provider-centric wording such as `our SaaS`.
 
 ## Query Priorities
 

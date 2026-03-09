@@ -33,6 +33,7 @@ See [Versioning Notes](references/versioning.md).
 - Keep event properties stable and query-relevant.
 - Avoid direct PII.
 - Use storage when you need stable `anonId` and `sessionId` across restarts.
+- For generated docs or README snippets, write from tenant developer perspective (`your app`, `your workspace`) and avoid provider-centric phrasing such as `our SaaS`.
 
 ## Minimal Web Setup
 
