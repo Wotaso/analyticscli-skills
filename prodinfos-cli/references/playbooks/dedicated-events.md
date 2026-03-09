@@ -1,0 +1,60 @@
+# Dedicated Events Playbook
+
+## Goal
+
+Provide a stable, predefined event taxonomy for the onboarding to paywall to purchase journey, so teams can build a dedicated dropoff chart without schema drift.
+
+## Canonical Event Names
+
+- `onboarding:start`
+- `onboarding:step_view`
+- `onboarding:step_complete`
+- `onboarding:complete`
+- `onboarding:skip`
+- `paywall:shown`
+- `paywall:skip`
+- `purchase:started`
+- `purchase:success`
+- `purchase:failed`
+- `purchase:cancel`
+
+## Required Properties
+
+All funnel events:
+
+- `appVersion`
+- `platform`
+- `runtimeEnv`
+- `isNewUser`
+- `onboardingFlowId`
+- `onboardingFlowVersion`
+
+Onboarding step events:
+
+- `stepKey`
+- `stepIndex`
+- `stepCount`
+
+Paywall and purchase events:
+
+- `source`
+- `paywallId`
+- `packageId`
+- `experimentVariant`
+- `entitlementKey`
+- `currency`
+
+## Dedicated Bar Chart Contract
+
+Use this formula for percent of new users who executed event X:
+
+- Denominator: distinct new users with `onboarding:start` in range
+- Numerator: distinct users from the same cohort who fired event X
+- Percentage: `numerator / denominator`
+
+## Handling Onboarding Structure Changes
+
+- Segment charts by `onboardingFlowId`.
+- Keep `stepKey` stable within a flow.
+- Do not merge different `stepCount` flows into one linear step chart.
+- If multiple flows exist in the same window, render one chart per flow or grouped bars by flow.
