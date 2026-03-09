@@ -88,3 +88,4 @@ pnpm skills:sync:clawhub -- --all --tags latest
 - Open issues in the public repo for install problems or unclear instructions.
 - Product code and source content are maintained in the Prodinfos monorepo and synced to this public package.
 - Mirror sync is triggered from private monorepo changes under `skills/**`.
+- Mirror source prefix for this public repo: `skills/`.
