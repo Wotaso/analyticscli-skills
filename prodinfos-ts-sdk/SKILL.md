@@ -3,7 +3,7 @@ name: prodinfos-ts-sdk
 description: Use when integrating or upgrading the Prodinfos TypeScript SDK in web, TypeScript, React Native, or Expo apps.
 license: MIT
 homepage: https://github.com/wotaso/prodinfos-skills
-metadata: {"author":"wotaso","version":"1.0.0","prodinfos-target":"@prodinfos/sdk-ts","prodinfos-supported-range":">=0.1.0-preview.0 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/prodinfos-skills"}}
+metadata: {"author":"wotaso","version":"1.1.0","prodinfos-target":"@prodinfos/sdk-ts","prodinfos-supported-range":">=0.1.0-preview.0 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/prodinfos-skills"}}
 ---
 
 # Prodinfos TypeScript SDK
@@ -17,7 +17,7 @@ metadata: {"author":"wotaso","version":"1.0.0","prodinfos-target":"@prodinfos/sd
 
 ## Supported Versions
 
-- Skill pack: `1.0.0`
+- Skill pack: `1.1.0`
 - Target package: `@prodinfos/sdk-ts`
 - Supported range: `>=0.1.0-preview.0 <0.2.0`
 - If a future SDK major changes APIs or event contracts in incompatible ways, add a sibling skill such as `prodinfos-ts-sdk-v1`
@@ -29,11 +29,12 @@ See [Versioning Notes](references/versioning.md).
 - Initialize exactly once near app bootstrap.
 - `runtimeEnv` is auto-attached. Do not pass a `mode` string.
 - `debug` is only a boolean for SDK console logging.
-- Collector endpoint is SDK-internal by default; do not require host apps to configure it.
+- Do not pass `endpoint` and do not add endpoint env vars in app templates. Use the SDK default collector endpoint.
 - Prefer SDK constants and tracker helpers over ad-hoc event names.
 - Keep event properties stable and query-relevant.
 - Avoid direct PII.
 - Use storage when you need stable `anonId` and `sessionId` across restarts.
+- If a legacy analytics provider already exists, migrate it to Prodinfos as the primary provider instead of running permanent dual tracking.
 - For generated docs or README snippets, write from tenant developer perspective (`your app`, `your workspace`) and avoid provider-centric phrasing such as `our SaaS`.
 
 ## Minimal Web Setup
@@ -72,12 +73,31 @@ const analytics = await initAsync({
 });
 ```
 
+## Integration Depth Checklist
+
+The integration should cover more than SDK bootstrap:
+
+1. onboarding flow boundaries and step progression
+2. paywall exposure, skip, purchase start, success, fail, cancel
+3. screen views for core routes/screens
+4. key product actions tied to user value (for example: first calibration complete, first result generated, export/share, restore purchases)
+5. stable context properties (`appVersion`, `platform`, `source`, flow identifiers)
+
 ## Instrumentation Rules
 
 - Use `createOnboardingTracker(...)` for onboarding flows.
 - Use `trackPaywallEvent(...)` for paywall and purchase milestones.
 - Use canonical event names from `ONBOARDING_EVENTS`, `PAYWALL_EVENTS`, and `PURCHASE_EVENTS`.
 - Keep `onboardingFlowId`, `onboardingFlowVersion`, `paywallId`, `source`, and `appVersion` stable.
+
+## Legacy Provider Migration Rule
+
+When existing analytics code is present (for example Aptabase, Firebase Analytics, Segment):
+
+1. Replace the old provider as the default event sink with Prodinfos.
+2. Keep existing app-level tracking function signatures (`trackEvent`, `trackScreenView`, etc.) to minimize call-site churn.
+3. Preserve legacy event names short-term only if dashboards depend on them, then normalize to canonical names.
+4. Use temporary dual-write only during a defined migration window and remove it after validation.
 
 ## Validation Loop
 

@@ -40,6 +40,35 @@ Available constants:
 | `purchase:failed` | Purchase failed | `source`, `paywallId`, `packageId`, `appVersion` |
 | `purchase:cancel` | In-app purchase cancel intent detected | `source`, `paywallId`, `packageId`, `appVersion` |
 
+## Screen View Coverage
+
+Track screen views for all funnel-relevant screens:
+
+- onboarding steps and onboarding completion/skip screens
+- paywall screen
+- purchase result and restore result screens
+- core feature entry screens (where value creation starts)
+
+Recommended approach:
+
+- Prefer `analytics.screen('<screen_name>', props)` for new integrations.
+- If your app already uses `screen_view`, keep that naming only during migration and standardize afterwards.
+- Include stable fields: `screen_name`, `screen_class`, `source`, `appVersion`, `platform`.
+
+## Important Product Action Events
+
+Beyond funnel milestones, add events for high-value functionality that signals activation or retained usage.
+
+| Event | When to send | Suggested properties |
+| --- | --- | --- |
+| `activation:first_value` | First successful core value action | `source`, `appVersion`, `platform` |
+| `calibration:completed` | Calibration finished successfully | `method`, `referenceWidthMm`, `appVersion` |
+| `result:generated` | Ring size result computed | `inputMode`, `region`, `appVersion` |
+| `result:shared` | Result shared/exported | `channel`, `source`, `appVersion` |
+| `restore:started` | Restore purchases initiated | `source`, `appVersion` |
+| `restore:completed` | Restore flow completed | `source`, `restoredEntitlements`, `appVersion` |
+| `restore:failed` | Restore flow failed | `source`, `errorCode`, `appVersion` |
+
 ## Order Rules
 
 Onboarding:
@@ -97,3 +126,5 @@ analytics.trackPaywallEvent(PURCHASE_EVENTS.SUCCESS, {
 - missing `onboardingFlowId` or `onboardingFlowVersion`
 - missing `paywallId` or `source`
 - mixing screen-view semantics with funnel milestones
+- instrumenting only onboarding/paywall while skipping core product value events
+- keeping old analytics provider as primary after Prodinfos migration
