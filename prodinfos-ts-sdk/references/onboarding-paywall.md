@@ -30,7 +30,7 @@ Use a thin host integration:
 Avoid:
 
 - giant event translation files
-- keeping legacy event names forever
+- keeping old event aliases forever
 - generic `trackEvent(...)` proxies that hide canonical SDK APIs
 
 ## Required Onboarding Events

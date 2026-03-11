@@ -21,7 +21,15 @@ import { init } from '@prodinfos/sdk-ts';
 export const analytics = init({
   apiKey: process.env.EXPO_PUBLIC_PRODINFOS_WRITE_KEY,
   debug: typeof __DEV__ === 'boolean' ? __DEV__ : false,
-  platform: Platform.OS === 'ios' || Platform.OS === 'android' ? Platform.OS : undefined,
+  platform:
+    Platform.OS === 'ios' ||
+    Platform.OS === 'android' ||
+    Platform.OS === 'windows' ||
+    Platform.OS === 'macos'
+      ? Platform.OS === 'macos'
+        ? 'mac'
+        : Platform.OS
+      : undefined,
   appVersion: Application.nativeApplicationVersion ?? undefined,
   dedupeOnboardingStepViewsPerSession: true,
   storage: {
@@ -59,17 +67,9 @@ analytics.trackPaywallEvent(PURCHASE_EVENTS.SUCCESS, {
 
 Do not generate by default:
 
-- `mapLegacyEventToCanonical(...)` with many branches
+- `mapEventToCanonical(...)` with many branches
 - giant generic `trackEvent(...)` indirection for all product events
 - per-call `try/catch` wrappers around every SDK call
 - `Promise<AnalyticsClient | null>` bootstrap patterns
-- `platform: 'react-native'` (use `ios`/`android` or omit)
+- `platform: 'react-native'` (use canonical `ios`/`android`/`mac`/`windows`/`web` or omit)
 - explicit `endpoint` in host app code
-
-## Compatibility Escape Hatch
-
-If the user explicitly requires a temporary compatibility phase:
-
-- isolate aliases in one small map
-- keep the shim temporary and documented
-- schedule cleanup to direct canonical calls

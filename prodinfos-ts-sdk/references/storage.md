@@ -33,7 +33,15 @@ import { init } from '@prodinfos/sdk-ts';
 const analytics = init({
   apiKey: process.env.EXPO_PUBLIC_PRODINFOS_WRITE_KEY,
   debug: typeof __DEV__ === 'boolean' ? __DEV__ : false,
-  platform: Platform.OS === 'ios' || Platform.OS === 'android' ? Platform.OS : undefined,
+  platform:
+    Platform.OS === 'ios' ||
+    Platform.OS === 'android' ||
+    Platform.OS === 'windows' ||
+    Platform.OS === 'macos'
+      ? Platform.OS === 'macos'
+        ? 'mac'
+        : Platform.OS
+      : undefined,
   appVersion: Application.nativeApplicationVersion ?? undefined,
   storage: {
     getItem: (key) => AsyncStorage.getItem(key),
@@ -57,7 +65,15 @@ const kv = new MMKV();
 const analytics = init({
   apiKey: process.env.EXPO_PUBLIC_PRODINFOS_WRITE_KEY,
   debug: typeof __DEV__ === 'boolean' ? __DEV__ : false,
-  platform: Platform.OS === 'ios' || Platform.OS === 'android' ? Platform.OS : undefined,
+  platform:
+    Platform.OS === 'ios' ||
+    Platform.OS === 'android' ||
+    Platform.OS === 'windows' ||
+    Platform.OS === 'macos'
+      ? Platform.OS === 'macos'
+        ? 'mac'
+        : Platform.OS
+      : undefined,
   storage: {
     getItem: (key) => kv.getString(key) ?? null,
     setItem: (key, value) => kv.set(key, value),

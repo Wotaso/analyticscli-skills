@@ -3,7 +3,7 @@ name: prodinfos-ts-sdk
 description: Use when integrating or upgrading the Prodinfos TypeScript SDK in web, TypeScript, React Native, or Expo apps.
 license: MIT
 homepage: https://github.com/wotaso/prodinfos-skills
-metadata: {"author":"wotaso","version":"1.5.0","prodinfos-target":"@prodinfos/sdk-ts","prodinfos-supported-range":">=0.1.0-preview.2 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/prodinfos-skills"}}
+metadata: {"author":"wotaso","version":"1.6.0","prodinfos-target":"@prodinfos/sdk-ts","prodinfos-supported-range":">=0.1.0-preview.3 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/prodinfos-skills"}}
 ---
 
 # Prodinfos TypeScript SDK
@@ -17,9 +17,9 @@ metadata: {"author":"wotaso","version":"1.5.0","prodinfos-target":"@prodinfos/sd
 
 ## Supported Versions
 
-- Skill pack: `1.5.0`
+- Skill pack: `1.6.0`
 - Target package: `@prodinfos/sdk-ts`
-- Supported range: `>=0.1.0-preview.2 <0.2.0`
+- Supported range: `>=0.1.0-preview.3 <0.2.0`
 - If a future SDK major changes APIs or event contracts in incompatible ways, add a sibling skill such as `prodinfos-ts-sdk-v1`
 
 See [Versioning Notes](references/versioning.md).
@@ -30,60 +30,43 @@ See [Versioning Notes](references/versioning.md).
 - Prefer `init('<YOUR_APP_KEY>')` shortform for the smallest setup.
 - `initFromEnv(...)` is also valid when env-first bootstrap is preferred.
 - Keep init options minimal: all init attributes are optional; `apiKey` is enough for ingest.
-- `projectId` is optional (legacy compatibility only).
 - `runtimeEnv` is auto-attached. Do not pass a `mode` string.
 - `debug` is only a boolean for SDK console logging.
 - Do not pass `endpoint` and do not add endpoint env vars in app templates. Use the SDK default collector endpoint.
 - For `platform`, do not use framework labels (`react-native`, `expo`).
-- Use only canonical platform values (`web`, `ios`, `android`) or omit the field.
-- In React Native/Expo, derive platform from `Platform.OS` and pass only `ios`/`android`; otherwise omit.
+- Use only canonical platform values (`web`, `ios`, `android`, `mac`, `windows`) or omit the field.
+- In React Native/Expo, derive platform from `Platform.OS` and map to canonical values (e.g. `macos -> mac`); otherwise omit.
 - In React Native/Expo, prefer `appVersion` from `expo-application` (`nativeApplicationVersion`), otherwise omit.
 - Prefer SDK trackers over host-side wrapper utilities. Keep integration code close to call sites.
 - Keep event properties stable and query-relevant.
 - Avoid direct PII.
 - Use storage when you need stable `anonId` and `sessionId` across restarts.
 - Avoid top-level `Promise` singletons in app utility files.
-- Use neutral file names like `analytics.ts` (not legacy provider names such as `aptabase.ts`).
+- Use neutral file names like `analytics.ts` (not provider-specific names such as `aptabase.ts`).
 - Avoid re-exporting `PAYWALL_EVENTS` / `PURCHASE_EVENTS` from host app utility files. Import SDK constants directly when needed, or use `createPaywallTracker(...)`.
 - Prefer SDK identity helpers (`setUser`, `identify`, `clearUser`) directly instead of wrapping identify logic in host-app boilerplate.
-- If a legacy analytics provider already exists, migrate it to Prodinfos as the primary provider instead of running permanent dual tracking.
+- If another analytics provider already exists, migrate it to Prodinfos as the primary provider instead of running permanent dual tracking.
 - For generated docs or README snippets, write from tenant developer perspective (`your app`, `your workspace`) and avoid provider-centric phrasing such as `our SaaS`.
-- Default to canonical SDK event names at call sites. Do not keep legacy event names unless the user explicitly requires a compatibility phase.
+- Default to canonical SDK event names at call sites.
 - Before generating host-app code, ensure `@prodinfos/sdk-ts` is upgraded to the newest preview in that repo.
-
-## Execution Modes
-
-- Default mode: `direct-canonical`
-- Optional mode: `compatibility-shim` (only if the user explicitly requests preserving legacy event names/signatures)
-
-In `direct-canonical` mode:
-- call SDK APIs directly in feature code
-- avoid generic proxy utilities
-- keep shared analytics helper files minimal
-
-In `compatibility-shim` mode:
-- keep the shim temporary and small
-- isolate legacy aliases in one place
-- plan cleanup immediately after migration
 
 ## Host App Minimalism Guardrails
 
 When this skill writes host-app code, optimize for low boilerplate by default.
 
-- Do not generate a large compatibility layer such as `mapLegacyEventToCanonical(...)` with many `switch` branches.
+- Do not generate a large event translation layer such as `mapEventToCanonical(...)` with many `switch` branches.
 - Do not create host-side wrappers around `identify`/`setUser` unless required by an existing app contract.
 - Do not add per-call `try/catch` wrappers around every analytics helper unless the user asked for that policy.
 - Do not duplicate SDK constants/events in host utility files.
 - Prefer direct SDK calls in feature code (`trackPaywallEvent`, tracker helpers, `screen`, `track`) instead of generic proxy helpers.
 - If a thin `analytics.ts` is needed, keep it focused to bootstrap + a few shared helpers. Avoid becoming an event-translation layer.
-- If compatibility is unavoidable, keep the shim temporary, clearly marked, and small.
 
 ## Hard Fail Patterns
 
-Do not generate these patterns unless the user explicitly asks for compatibility mode:
+Do not generate these patterns:
 
-- giant `switch`/`if` trees that translate many legacy event names
-- helpers like `mapLegacyEventToCanonical(...)` spanning many event cases
+- giant `switch`/`if` trees that translate event names
+- helpers like `mapEventToCanonical(...)` spanning many event cases
 - broad catch-all wrappers around every analytics call
 - top-level `Promise<AnalyticsClient | null>` bootstrap patterns
 - host-side re-exports of SDK constants/events
@@ -98,10 +81,10 @@ Before finishing, verify the generated integration code meets all checks:
 
 1. bootstrap uses `init('<API_KEY>')`, `init({...})`, or `initFromEnv(...)` (latest supported minimal equivalent)
 2. no explicit `endpoint` env var in host app templates
-3. no large legacy translation layer added
+3. no large event translation layer added
 4. SDK APIs used directly at call sites for onboarding/paywall/purchase milestones
 5. identity uses SDK methods directly (`identify`/`setUser`/`clearUser`) without extra wrappers
-6. `platform` is `web`/`ios`/`android` or omitted (never framework labels)
+6. `platform` is `web`/`ios`/`android`/`mac`/`windows` or omitted (never framework labels)
 
 ## Minimal Web Setup
 
@@ -117,7 +100,6 @@ const analytics = init(process.env.NEXT_PUBLIC_PRODINFOS_WRITE_KEY ?? '');
 
 `initFromEnv(...)` env key lookup order:
 - API key: `PRODINFOS_WRITE_KEY`, `NEXT_PUBLIC_PRODINFOS_WRITE_KEY`, `EXPO_PUBLIC_PRODINFOS_WRITE_KEY`, `VITE_PRODINFOS_WRITE_KEY`
-- Optional legacy project id: `PRODINFOS_PROJECT_ID`, `NEXT_PUBLIC_PRODINFOS_PROJECT_ID`, `EXPO_PUBLIC_PRODINFOS_PROJECT_ID`, `VITE_PRODINFOS_PROJECT_ID`
 
 Missing config behavior:
 - default is safe no-op client when API key is missing
@@ -134,7 +116,15 @@ import { init } from '@prodinfos/sdk-ts';
 const analytics = init({
   apiKey: process.env.EXPO_PUBLIC_PRODINFOS_WRITE_KEY,
   debug: typeof __DEV__ === 'boolean' ? __DEV__ : false,
-  platform: Platform.OS === 'ios' || Platform.OS === 'android' ? Platform.OS : undefined,
+  platform:
+    Platform.OS === 'ios' ||
+    Platform.OS === 'android' ||
+    Platform.OS === 'windows' ||
+    Platform.OS === 'macos'
+      ? Platform.OS === 'macos'
+        ? 'mac'
+        : Platform.OS
+      : undefined,
   appVersion: Application.nativeApplicationVersion ?? undefined,
   dedupeOnboardingStepViewsPerSession: true,
   storage: {
@@ -172,9 +162,7 @@ When existing analytics code is present (for example Aptabase, Firebase Analytic
 
 1. Replace the old provider as the default event sink with Prodinfos.
 2. Prefer migrating call sites to canonical Prodinfos event names directly.
-3. Only keep existing app-level tracking signatures if the user explicitly asks for compatibility.
-4. If legacy names must be preserved short-term, isolate the shim and schedule immediate cleanup.
-5. Use temporary dual-write only during a defined migration window and remove it after validation.
+3. Use temporary dual-write only during a defined migration window and remove it after validation.
 
 ## Validation Loop
 
