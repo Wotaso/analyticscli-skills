@@ -8,6 +8,7 @@ Prefer these helpers over ad-hoc strings:
 
 - `trackOnboardingEvent(...)`
 - `createOnboardingTracker(...)`
+- `createPaywallTracker(...)`
 - `trackPaywallEvent(...)`
 - `trackOnboardingSurveyResponse(...)`
 
@@ -85,8 +86,6 @@ Paywall journey:
 ## Example
 
 ```ts
-import { PAYWALL_EVENTS, PURCHASE_EVENTS } from '@prodinfos/sdk-ts';
-
 const onboarding = analytics.createOnboardingTracker({
   appVersion: '1.8.0',
   isNewUser: true,
@@ -94,6 +93,11 @@ const onboarding = analytics.createOnboardingTracker({
   onboardingFlowVersion: '4.0.0',
   stepCount: 5,
   surveyKey: 'onboarding_v4',
+});
+const paywall = analytics.createPaywallTracker({
+  source: 'onboarding',
+  paywallId: 'default_paywall',
+  appVersion: '1.8.0',
 });
 const welcomeStep = onboarding.step('welcome', 0);
 
@@ -105,18 +109,12 @@ welcomeStep.surveyResponse({
   responseKey: 'increase_revenue',
 });
 
-analytics.trackPaywallEvent(PAYWALL_EVENTS.SHOWN, {
-  source: 'onboarding',
-  paywallId: 'default_paywall',
+paywall.shown({
   fromScreen: 'onboarding_offer',
-  appVersion: '1.8.0',
 });
 
-analytics.trackPaywallEvent(PURCHASE_EVENTS.SUCCESS, {
-  source: 'onboarding',
-  paywallId: 'default_paywall',
+paywall.purchaseSuccess({
   packageId: 'annual',
-  appVersion: '1.8.0',
 });
 ```
 

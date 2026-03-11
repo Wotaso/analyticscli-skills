@@ -30,10 +30,14 @@ See [Versioning Notes](references/versioning.md).
 - `runtimeEnv` is auto-attached. Do not pass a `mode` string.
 - `debug` is only a boolean for SDK console logging.
 - Do not pass `endpoint` and do not add endpoint env vars in app templates. Use the SDK default collector endpoint.
-- Prefer SDK constants and tracker helpers over ad-hoc event names.
+- Prefer SDK trackers over host-side wrapper utilities. Keep integration code close to call sites.
 - Keep event properties stable and query-relevant.
 - Avoid direct PII.
 - Use storage when you need stable `anonId` and `sessionId` across restarts.
+- Prefer `init(...)` in host apps, even with async storage adapters. Avoid top-level `Promise` singletons in app utility files.
+- Use neutral file names like `analytics.ts` (not legacy provider names such as `aptabase.ts`).
+- Avoid re-exporting `PAYWALL_EVENTS` / `PURCHASE_EVENTS` from host app utility files. Import SDK constants directly when needed, or use `createPaywallTracker(...)`.
+- Prefer SDK identity helpers (`setUser`, `identify`, `clearUser`) directly instead of wrapping identify logic in host-app boilerplate.
 - If a legacy analytics provider already exists, migrate it to Prodinfos as the primary provider instead of running permanent dual tracking.
 - For generated docs or README snippets, write from tenant developer perspective (`your app`, `your workspace`) and avoid provider-centric phrasing such as `our SaaS`.
 
@@ -56,9 +60,9 @@ const analytics = init({
 
 ```ts
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { initAsync } from '@prodinfos/sdk-ts';
+import { init } from '@prodinfos/sdk-ts';
 
-const analytics = await initAsync({
+const analytics = init({
   apiKey: process.env.PRODINFOS_WRITE_KEY!,
   projectId: process.env.PRODINFOS_PROJECT_ID!,
   debug: typeof __DEV__ === 'boolean' ? __DEV__ : false,
@@ -71,6 +75,9 @@ const analytics = await initAsync({
     removeItem: (key) => AsyncStorage.removeItem(key),
   },
 });
+
+// Optional: await if you need persisted ids before very first event.
+void analytics.ready();
 ```
 
 ## Integration Depth Checklist
@@ -86,7 +93,8 @@ The integration should cover more than SDK bootstrap:
 ## Instrumentation Rules
 
 - Use `createOnboardingTracker(...)` for onboarding flows.
-- Use `trackPaywallEvent(...)` for paywall and purchase milestones.
+- Use `createPaywallTracker(...)` when paywall context is stable in a flow (`source`, `paywallId`, experiment variant).
+- Use `trackPaywallEvent(...)` for one-off paywall and purchase milestones.
 - Use canonical event names from `ONBOARDING_EVENTS`, `PAYWALL_EVENTS`, and `PURCHASE_EVENTS`.
 - Keep `onboardingFlowId`, `onboardingFlowVersion`, `paywallId`, `source`, and `appVersion` stable.
 

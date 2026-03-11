@@ -10,7 +10,7 @@ Storage is optional in `@prodinfos/sdk-ts`.
 | Strategy | Good for | Tradeoff |
 | --- | --- | --- |
 | No adapter | Fast prototypes and short sessions | IDs reset across restarts |
-| `@react-native-async-storage/async-storage` | Standard React Native persistence | Async hydration, so prefer `initAsync(...)` |
+| `@react-native-async-storage/async-storage` | Standard React Native persistence | Async hydration happens in background; call `ready()` only when you must block first event |
 | `react-native-mmkv` | Fast local key-value storage in RN | Native dependency |
 | Custom adapter | Existing secure or encrypted store | You own the wrapper |
 
@@ -30,9 +30,9 @@ const analytics = init({
 
 ```ts
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { initAsync } from '@prodinfos/sdk-ts';
+import { init } from '@prodinfos/sdk-ts';
 
-const analytics = await initAsync({
+const analytics = init({
   apiKey,
   projectId,
   debug: typeof __DEV__ === 'boolean' ? __DEV__ : false,
@@ -43,6 +43,8 @@ const analytics = await initAsync({
     removeItem: (key) => AsyncStorage.removeItem(key),
   },
 });
+
+void analytics.ready();
 ```
 
 ## MMKV Example
