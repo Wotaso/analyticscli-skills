@@ -69,6 +69,7 @@ Recommended approach:
 - Prefer `analytics.screen('<screen_name>', props)` for new integrations.
 - If your app already uses `screen_view`, keep that naming only during migration and standardize afterwards.
 - Include stable fields: `screen_name`, `screen_class`, `source`, `appVersion`, `platform`.
+- Prefer direct canonical calls (`trackPaywallEvent`, tracker methods) at call sites over generic `trackEvent(...)` proxy layers.
 
 ## Important Product Action Events
 

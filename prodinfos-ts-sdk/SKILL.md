@@ -3,7 +3,7 @@ name: prodinfos-ts-sdk
 description: Use when integrating or upgrading the Prodinfos TypeScript SDK in web, TypeScript, React Native, or Expo apps.
 license: MIT
 homepage: https://github.com/wotaso/prodinfos-skills
-metadata: {"author":"wotaso","version":"1.3.0","prodinfos-target":"@prodinfos/sdk-ts","prodinfos-supported-range":">=0.1.0-preview.0 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/prodinfos-skills"}}
+metadata: {"author":"wotaso","version":"1.4.0","prodinfos-target":"@prodinfos/sdk-ts","prodinfos-supported-range":">=0.1.0-preview.0 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/prodinfos-skills"}}
 ---
 
 # Prodinfos TypeScript SDK
@@ -17,7 +17,7 @@ metadata: {"author":"wotaso","version":"1.3.0","prodinfos-target":"@prodinfos/sd
 
 ## Supported Versions
 
-- Skill pack: `1.3.0`
+- Skill pack: `1.4.0`
 - Target package: `@prodinfos/sdk-ts`
 - Supported range: `>=0.1.0-preview.0 <0.2.0`
 - If a future SDK major changes APIs or event contracts in incompatible ways, add a sibling skill such as `prodinfos-ts-sdk-v1`
@@ -42,6 +42,22 @@ See [Versioning Notes](references/versioning.md).
 - If a legacy analytics provider already exists, migrate it to Prodinfos as the primary provider instead of running permanent dual tracking.
 - For generated docs or README snippets, write from tenant developer perspective (`your app`, `your workspace`) and avoid provider-centric phrasing such as `our SaaS`.
 - Default to canonical SDK event names at call sites. Do not keep legacy event names unless the user explicitly requires a compatibility phase.
+- Before generating host-app code, ensure `@prodinfos/sdk-ts` is upgraded to the newest preview in that repo.
+
+## Execution Modes
+
+- Default mode: `direct-canonical`
+- Optional mode: `compatibility-shim` (only if the user explicitly requests preserving legacy event names/signatures)
+
+In `direct-canonical` mode:
+- call SDK APIs directly in feature code
+- avoid generic proxy utilities
+- keep shared analytics helper files minimal
+
+In `compatibility-shim` mode:
+- keep the shim temporary and small
+- isolate legacy aliases in one place
+- plan cleanup immediately after migration
 
 ## Host App Minimalism Guardrails
 
@@ -54,6 +70,30 @@ When this skill writes host-app code, optimize for low boilerplate by default.
 - Prefer direct SDK calls in feature code (`trackPaywallEvent`, tracker helpers, `screen`, `track`) instead of generic proxy helpers.
 - If a thin `analytics.ts` is needed, keep it focused to bootstrap + a few shared helpers. Avoid becoming an event-translation layer.
 - If compatibility is unavoidable, keep the shim temporary, clearly marked, and small.
+
+## Hard Fail Patterns
+
+Do not generate these patterns unless the user explicitly asks for compatibility mode:
+
+- giant `switch`/`if` trees that translate many legacy event names
+- helpers like `mapLegacyEventToCanonical(...)` spanning many event cases
+- broad catch-all wrappers around every analytics call
+- top-level `Promise<AnalyticsClient | null>` bootstrap patterns
+- host-side re-exports of SDK constants/events
+
+If such a pattern already exists in the target codebase:
+- do not expand it
+- prefer reducing it while keeping behavior stable
+
+## Pre-Ship Self-Check
+
+Before finishing, verify the generated integration code meets all checks:
+
+1. bootstrap uses `initFromEnv(...)` (or latest supported minimal equivalent)
+2. no explicit `endpoint` env var in host app templates
+3. no large legacy translation layer added
+4. SDK APIs used directly at call sites for onboarding/paywall/purchase milestones
+5. identity uses SDK methods directly (`identify`/`setUser`/`clearUser`) without extra wrappers
 
 ## Minimal Web Setup
 
@@ -139,5 +179,6 @@ prodinfos get onboarding-journey --project <projectId> --last 30d --format text
 ## References
 
 - [Onboarding And Paywall Contract](references/onboarding-paywall.md)
+- [Minimal Host Template](references/minimal-host-template.md)
 - [Storage Options](references/storage.md)
 - [Versioning Notes](references/versioning.md)
