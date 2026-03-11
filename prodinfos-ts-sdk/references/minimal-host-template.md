@@ -14,12 +14,15 @@ Keep host code small and explicit:
 
 ```ts
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { initFromEnv } from '@prodinfos/sdk-ts';
+import * as Application from 'expo-application';
+import { Platform } from 'react-native';
+import { init } from '@prodinfos/sdk-ts';
 
-export const analytics = initFromEnv({
+export const analytics = init({
+  apiKey: process.env.EXPO_PUBLIC_PRODINFOS_WRITE_KEY,
   debug: typeof __DEV__ === 'boolean' ? __DEV__ : false,
-  platform: 'react-native',
-  appVersion: '1.0.0',
+  platform: Platform.OS === 'ios' || Platform.OS === 'android' ? Platform.OS : undefined,
+  appVersion: Application.nativeApplicationVersion ?? undefined,
   dedupeOnboardingStepViewsPerSession: true,
   storage: {
     getItem: (key) => AsyncStorage.getItem(key),
@@ -60,6 +63,8 @@ Do not generate by default:
 - giant generic `trackEvent(...)` indirection for all product events
 - per-call `try/catch` wrappers around every SDK call
 - `Promise<AnalyticsClient | null>` bootstrap patterns
+- `platform: 'react-native'` (use `ios`/`android` or omit)
+- explicit `endpoint` in host app code
 
 ## Compatibility Escape Hatch
 

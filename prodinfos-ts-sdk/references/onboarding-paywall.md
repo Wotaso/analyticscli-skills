@@ -23,7 +23,7 @@ Available constants:
 
 Use a thin host integration:
 
-- one SDK bootstrap (`initFromEnv(...)`)
+- one SDK bootstrap (`init('<APP_KEY>')`, `init({...})`, or `initFromEnv(...)`)
 - direct tracker/event calls in feature code
 - minimal shared helpers only when multiple call sites truly reuse the same payload shape
 

@@ -3,7 +3,7 @@ name: prodinfos-ts-sdk
 description: Use when integrating or upgrading the Prodinfos TypeScript SDK in web, TypeScript, React Native, or Expo apps.
 license: MIT
 homepage: https://github.com/wotaso/prodinfos-skills
-metadata: {"author":"wotaso","version":"1.4.0","prodinfos-target":"@prodinfos/sdk-ts","prodinfos-supported-range":">=0.1.0-preview.0 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/prodinfos-skills"}}
+metadata: {"author":"wotaso","version":"1.5.0","prodinfos-target":"@prodinfos/sdk-ts","prodinfos-supported-range":">=0.1.0-preview.2 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/prodinfos-skills"}}
 ---
 
 # Prodinfos TypeScript SDK
@@ -17,9 +17,9 @@ metadata: {"author":"wotaso","version":"1.4.0","prodinfos-target":"@prodinfos/sd
 
 ## Supported Versions
 
-- Skill pack: `1.4.0`
+- Skill pack: `1.5.0`
 - Target package: `@prodinfos/sdk-ts`
-- Supported range: `>=0.1.0-preview.0 <0.2.0`
+- Supported range: `>=0.1.0-preview.2 <0.2.0`
 - If a future SDK major changes APIs or event contracts in incompatible ways, add a sibling skill such as `prodinfos-ts-sdk-v1`
 
 See [Versioning Notes](references/versioning.md).
@@ -27,15 +27,22 @@ See [Versioning Notes](references/versioning.md).
 ## Core Rules
 
 - Initialize exactly once near app bootstrap.
-- Prefer `initFromEnv(...)` as default bootstrap path to minimize host app boilerplate.
+- Prefer `init('<YOUR_APP_KEY>')` shortform for the smallest setup.
+- `initFromEnv(...)` is also valid when env-first bootstrap is preferred.
+- Keep init options minimal: all init attributes are optional; `apiKey` is enough for ingest.
+- `projectId` is optional (legacy compatibility only).
 - `runtimeEnv` is auto-attached. Do not pass a `mode` string.
 - `debug` is only a boolean for SDK console logging.
 - Do not pass `endpoint` and do not add endpoint env vars in app templates. Use the SDK default collector endpoint.
+- For `platform`, do not use framework labels (`react-native`, `expo`).
+- Use only canonical platform values (`web`, `ios`, `android`) or omit the field.
+- In React Native/Expo, derive platform from `Platform.OS` and pass only `ios`/`android`; otherwise omit.
+- In React Native/Expo, prefer `appVersion` from `expo-application` (`nativeApplicationVersion`), otherwise omit.
 - Prefer SDK trackers over host-side wrapper utilities. Keep integration code close to call sites.
 - Keep event properties stable and query-relevant.
 - Avoid direct PII.
 - Use storage when you need stable `anonId` and `sessionId` across restarts.
-- Prefer `initFromEnv(...)` in host apps, even with async storage adapters. Avoid top-level `Promise` singletons in app utility files.
+- Avoid top-level `Promise` singletons in app utility files.
 - Use neutral file names like `analytics.ts` (not legacy provider names such as `aptabase.ts`).
 - Avoid re-exporting `PAYWALL_EVENTS` / `PURCHASE_EVENTS` from host app utility files. Import SDK constants directly when needed, or use `createPaywallTracker(...)`.
 - Prefer SDK identity helpers (`setUser`, `identify`, `clearUser`) directly instead of wrapping identify logic in host-app boilerplate.
@@ -89,43 +96,46 @@ If such a pattern already exists in the target codebase:
 
 Before finishing, verify the generated integration code meets all checks:
 
-1. bootstrap uses `initFromEnv(...)` (or latest supported minimal equivalent)
+1. bootstrap uses `init('<API_KEY>')`, `init({...})`, or `initFromEnv(...)` (latest supported minimal equivalent)
 2. no explicit `endpoint` env var in host app templates
 3. no large legacy translation layer added
 4. SDK APIs used directly at call sites for onboarding/paywall/purchase milestones
 5. identity uses SDK methods directly (`identify`/`setUser`/`clearUser`) without extra wrappers
+6. `platform` is `web`/`ios`/`android` or omitted (never framework labels)
 
 ## Minimal Web Setup
 
 ```ts
-import { initFromEnv } from '@prodinfos/sdk-ts';
+import { init } from '@prodinfos/sdk-ts';
 
-const analytics = initFromEnv({
-  debug: false,
-  platform: 'web',
-  appVersion: '1.0.0',
-  dedupeOnboardingStepViewsPerSession: true,
-});
+const analytics = init(process.env.NEXT_PUBLIC_PRODINFOS_WRITE_KEY ?? '');
 ```
 
-Default env key lookup order:
+`init(...)` accepts:
+- shortform string: `init('<YOUR_APP_KEY>')`
+- object form: `init({ apiKey: '<YOUR_APP_KEY>', ...optionalConfig })`
+
+`initFromEnv(...)` env key lookup order:
 - API key: `PRODINFOS_WRITE_KEY`, `NEXT_PUBLIC_PRODINFOS_WRITE_KEY`, `EXPO_PUBLIC_PRODINFOS_WRITE_KEY`, `VITE_PRODINFOS_WRITE_KEY`
-- Project id: `PRODINFOS_PROJECT_ID`, `NEXT_PUBLIC_PRODINFOS_PROJECT_ID`, `EXPO_PUBLIC_PRODINFOS_PROJECT_ID`, `VITE_PRODINFOS_PROJECT_ID`
+- Optional legacy project id: `PRODINFOS_PROJECT_ID`, `NEXT_PUBLIC_PRODINFOS_PROJECT_ID`, `EXPO_PUBLIC_PRODINFOS_PROJECT_ID`, `VITE_PRODINFOS_PROJECT_ID`
 
 Missing config behavior:
-- default is safe no-op client
+- default is safe no-op client when API key is missing
 - use `missingConfigMode: 'throw'` when startup should fail fast
 
 ## React Native Setup
 
 ```ts
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { initFromEnv } from '@prodinfos/sdk-ts';
+import * as Application from 'expo-application';
+import { Platform } from 'react-native';
+import { init } from '@prodinfos/sdk-ts';
 
-const analytics = initFromEnv({
+const analytics = init({
+  apiKey: process.env.EXPO_PUBLIC_PRODINFOS_WRITE_KEY,
   debug: typeof __DEV__ === 'boolean' ? __DEV__ : false,
-  platform: 'react-native',
-  appVersion: '1.0.0',
+  platform: Platform.OS === 'ios' || Platform.OS === 'android' ? Platform.OS : undefined,
+  appVersion: Application.nativeApplicationVersion ?? undefined,
   dedupeOnboardingStepViewsPerSession: true,
   storage: {
     getItem: (key) => AsyncStorage.getItem(key),

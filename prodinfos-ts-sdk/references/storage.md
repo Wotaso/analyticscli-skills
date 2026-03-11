@@ -17,22 +17,24 @@ Storage is optional in `@prodinfos/sdk-ts`.
 ## Minimal Example
 
 ```ts
-import { initFromEnv } from '@prodinfos/sdk-ts';
+import { init } from '@prodinfos/sdk-ts';
 
-const analytics = initFromEnv({
-  debug: false,
-});
+const analytics = init('<YOUR_APP_KEY>');
 ```
 
 ## AsyncStorage Example
 
 ```ts
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { initFromEnv } from '@prodinfos/sdk-ts';
+import * as Application from 'expo-application';
+import { Platform } from 'react-native';
+import { init } from '@prodinfos/sdk-ts';
 
-const analytics = initFromEnv({
+const analytics = init({
+  apiKey: process.env.EXPO_PUBLIC_PRODINFOS_WRITE_KEY,
   debug: typeof __DEV__ === 'boolean' ? __DEV__ : false,
-  platform: 'react-native',
+  platform: Platform.OS === 'ios' || Platform.OS === 'android' ? Platform.OS : undefined,
+  appVersion: Application.nativeApplicationVersion ?? undefined,
   storage: {
     getItem: (key) => AsyncStorage.getItem(key),
     setItem: (key, value) => AsyncStorage.setItem(key, value),
@@ -47,12 +49,15 @@ void analytics.ready();
 
 ```ts
 import { MMKV } from 'react-native-mmkv';
-import { initFromEnv } from '@prodinfos/sdk-ts';
+import { Platform } from 'react-native';
+import { init } from '@prodinfos/sdk-ts';
 
 const kv = new MMKV();
 
-const analytics = initFromEnv({
+const analytics = init({
+  apiKey: process.env.EXPO_PUBLIC_PRODINFOS_WRITE_KEY,
   debug: typeof __DEV__ === 'boolean' ? __DEV__ : false,
+  platform: Platform.OS === 'ios' || Platform.OS === 'android' ? Platform.OS : undefined,
   storage: {
     getItem: (key) => kv.getString(key) ?? null,
     setItem: (key, value) => kv.set(key, value),
