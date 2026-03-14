@@ -35,8 +35,8 @@ See [Versioning Notes](references/versioning.md).
 - Do not pass `endpoint` and do not add endpoint env vars in app templates. Use the SDK default collector endpoint.
 - For `platform`, do not use framework labels (`react-native`, `expo`).
 - Use only canonical platform values (`web`, `ios`, `android`, `mac`, `windows`) or omit the field.
-- In React Native/Expo, derive platform from `Platform.OS` and map to canonical values (e.g. `macos -> mac`); otherwise omit.
-- In React Native/Expo, prefer `appVersion` from `expo-application` (`nativeApplicationVersion`), otherwise omit.
+- In React Native/Expo, pass `Platform.OS` directly; the SDK normalizes values like `macos -> mac` and `win32 -> windows`.
+- In React Native/Expo, prefer `appVersion` from `expo-application` (`nativeApplicationVersion`); nullable values can be passed directly.
 - Prefer SDK trackers over host-side wrapper utilities. Keep integration code close to call sites.
 - Keep event properties stable and query-relevant.
 - Avoid direct PII.
@@ -115,28 +115,15 @@ import { init } from '@analyticscli/sdk';
 
 const analytics = init({
   apiKey: process.env.EXPO_PUBLIC_ANALYTICSCLI_WRITE_KEY,
-  debug: typeof __DEV__ === 'boolean' ? __DEV__ : false,
-  platform:
-    Platform.OS === 'ios' ||
-    Platform.OS === 'android' ||
-    Platform.OS === 'windows' ||
-    Platform.OS === 'macos'
-      ? Platform.OS === 'macos'
-        ? 'mac'
-        : Platform.OS
-      : undefined,
-  appVersion: Application.nativeApplicationVersion ?? undefined,
+  debug: __DEV__,
+  platform: Platform.OS,
+  appVersion: Application.nativeApplicationVersion,
   dedupeOnboardingStepViewsPerSession: true,
-  storage: {
-    getItem: (key) => AsyncStorage.getItem(key),
-    setItem: (key, value) => AsyncStorage.setItem(key, value),
-    removeItem: (key) => AsyncStorage.removeItem(key),
-  },
+  storage: AsyncStorage,
 });
-
-// Optional: await if you need persisted ids before very first event.
-void analytics.ready();
 ```
+
+`ready()` is optional; tracking starts on `init(...)`.
 
 ## Integration Depth Checklist
 

@@ -30,6 +30,4 @@ npx skills add wotaso/analyticscli-skills
 ## Support Model
 
 - Open issues in the public repo for install problems or unclear instructions.
-- Product code and source content are maintained in the AnalyticsCLI monorepo and synced to this public package.
-- Mirror sync is triggered from private monorepo changes under `skills/**`.
-- Mirror source prefix for this public repo: `skills/`.
+- Use this repo as the install and distribution source for the published skills.

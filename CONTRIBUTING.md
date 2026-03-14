@@ -1,12 +1,11 @@
 # Contributing
 
-This repository is a public mirror of the AnalyticsCLI skill pack.
+This repository contains the published AnalyticsCLI skill pack.
 
 ## Before You Change Anything
 
-- Treat this repo as a distribution target, not the primary authoring location.
 - Open an issue first for larger changes.
-- Expect direct edits here to be overwritten by the next mirror sync.
+- Prefer focused fixes over broad repo-wide refactors.
 
 ## Good Contributions
 
@@ -17,7 +16,7 @@ This repository is a public mirror of the AnalyticsCLI skill pack.
 
 ## Less Useful Contributions
 
-- repo-wide refactors without a matching monorepo change
+- repo-wide refactors without a matching product change
 - formatting-only churn
 - changes that make a skill broader instead of more focused
 

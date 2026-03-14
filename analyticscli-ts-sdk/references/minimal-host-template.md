@@ -20,26 +20,12 @@ import { init } from '@analyticscli/sdk';
 
 export const analytics = init({
   apiKey: process.env.EXPO_PUBLIC_ANALYTICSCLI_WRITE_KEY,
-  debug: typeof __DEV__ === 'boolean' ? __DEV__ : false,
-  platform:
-    Platform.OS === 'ios' ||
-    Platform.OS === 'android' ||
-    Platform.OS === 'windows' ||
-    Platform.OS === 'macos'
-      ? Platform.OS === 'macos'
-        ? 'mac'
-        : Platform.OS
-      : undefined,
-  appVersion: Application.nativeApplicationVersion ?? undefined,
+  debug: __DEV__,
+  platform: Platform.OS,
+  appVersion: Application.nativeApplicationVersion,
   dedupeOnboardingStepViewsPerSession: true,
-  storage: {
-    getItem: (key) => AsyncStorage.getItem(key),
-    setItem: (key, value) => AsyncStorage.setItem(key, value),
-    removeItem: (key) => AsyncStorage.removeItem(key),
-  },
+  storage: AsyncStorage,
 });
-
-void analytics.ready();
 ```
 
 ## Call-Site Template
