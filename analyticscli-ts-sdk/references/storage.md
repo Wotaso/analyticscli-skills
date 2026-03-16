@@ -31,7 +31,9 @@ import { Platform } from 'react-native';
 import { init } from '@analyticscli/sdk';
 
 const analytics = init({
-  apiKey: process.env.EXPO_PUBLIC_ANALYTICSCLI_WRITE_KEY,
+  apiKey:
+    process.env.EXPO_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY ??
+    process.env.EXPO_PUBLIC_ANALYTICSCLI_WRITE_KEY,
   debug: __DEV__,
   platform: Platform.OS,
   appVersion: Application.nativeApplicationVersion,
@@ -49,7 +51,9 @@ import { init } from '@analyticscli/sdk';
 const kv = new MMKV();
 
 const analytics = init({
-  apiKey: process.env.EXPO_PUBLIC_ANALYTICSCLI_WRITE_KEY,
+  apiKey:
+    process.env.EXPO_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY ??
+    process.env.EXPO_PUBLIC_ANALYTICSCLI_WRITE_KEY,
   debug: __DEV__,
   platform: Platform.OS,
   storage: {

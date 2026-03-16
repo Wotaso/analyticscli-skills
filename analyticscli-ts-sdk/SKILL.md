@@ -30,6 +30,7 @@ See [Versioning Notes](references/versioning.md).
 - Prefer `init('<YOUR_APP_KEY>')` shortform for the smallest setup.
 - `initFromEnv(...)` is also valid when env-first bootstrap is preferred.
 - Keep init options minimal: all init attributes are optional; `apiKey` is enough for ingest.
+- In host apps, prefer env names that communicate client-safe usage (for example `ANALYTICSCLI_PUBLISHABLE_API_KEY`), while keeping `*_WRITE_KEY` names as compatibility aliases.
 - `runtimeEnv` is auto-attached. Do not pass a `mode` string.
 - `debug` is only a boolean for SDK console logging.
 - Do not pass `endpoint` and do not add endpoint env vars in app templates. Use the SDK default collector endpoint.
@@ -91,15 +92,22 @@ Before finishing, verify the generated integration code meets all checks:
 ```ts
 import { init } from '@analyticscli/sdk';
 
-const analytics = init(process.env.NEXT_PUBLIC_ANALYTICSCLI_WRITE_KEY ?? '');
+const analytics = init(
+  process.env.NEXT_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY ??
+    process.env.NEXT_PUBLIC_ANALYTICSCLI_WRITE_KEY ??
+    '',
+);
 ```
 
 `init(...)` accepts:
 - shortform string: `init('<YOUR_APP_KEY>')`
 - object form: `init({ apiKey: '<YOUR_APP_KEY>', ...optionalConfig })`
 
-`initFromEnv(...)` env key lookup order:
-- API key: `ANALYTICSCLI_WRITE_KEY`, `NEXT_PUBLIC_ANALYTICSCLI_WRITE_KEY`, `EXPO_PUBLIC_ANALYTICSCLI_WRITE_KEY`, `VITE_ANALYTICSCLI_WRITE_KEY`
+`initFromEnv(...)` default env key lookup order:
+- API key (publishable first): `ANALYTICSCLI_PUBLISHABLE_API_KEY`, `NEXT_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY`, `EXPO_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY`, `VITE_ANALYTICSCLI_PUBLISHABLE_API_KEY`
+- compatibility fallback: `ANALYTICSCLI_WRITE_KEY`, `NEXT_PUBLIC_ANALYTICSCLI_WRITE_KEY`, `EXPO_PUBLIC_ANALYTICSCLI_WRITE_KEY`, `VITE_ANALYTICSCLI_WRITE_KEY`
+
+If the host app uses custom env naming, set `apiKeyEnvKeys` explicitly.
 
 Missing config behavior:
 - default is safe no-op client when API key is missing
@@ -114,7 +122,9 @@ import { Platform } from 'react-native';
 import { init } from '@analyticscli/sdk';
 
 const analytics = init({
-  apiKey: process.env.EXPO_PUBLIC_ANALYTICSCLI_WRITE_KEY,
+  apiKey:
+    process.env.EXPO_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY ??
+    process.env.EXPO_PUBLIC_ANALYTICSCLI_WRITE_KEY,
   debug: __DEV__,
   platform: Platform.OS,
   appVersion: Application.nativeApplicationVersion,
