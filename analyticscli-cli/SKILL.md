@@ -36,6 +36,7 @@ See [Versioning Notes](references/versioning.md).
 - Prefer high-level query endpoints over raw exports.
 - Keep groupings and result sets bounded.
 - Treat release-only data as the default.
+- Never pass secrets via CLI flags or inline literals (argv/shell history leakage risk). Use interactive prompts instead.
 - For generated docs or help text, use tenant developer voice (`your workspace`, `your project`) and avoid provider-centric wording such as `our SaaS`.
 - Keep `analyticscli-cli` skill fresh with CLI updates, but do not auto-force `analyticscli-ts-sdk` skill updates across repositories.
 
@@ -75,14 +76,15 @@ Preferred:
 
 ```bash
 npm i -g @analyticscli/cli
-analyticscli setup --token <readonly_token>
+analyticscli setup
+# Paste readonly token only when prompted; do not pass token as a command argument.
 ```
 
 Alternatives:
 
 ```bash
-analyticscli login --readonly-token <readonly_token>
-analyticscli login --clerk-jwt <clerk_jwt>
+analyticscli login
+# Choose readonly-token or Clerk flow interactively; do not put JWT/token values in command args.
 ```
 
 ## Output Mode
