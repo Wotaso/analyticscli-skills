@@ -42,8 +42,10 @@ See [Versioning Notes](references/versioning.md).
 - Prefer SDK trackers over host-side wrapper utilities. Keep integration code close to call sites.
 - Keep event properties stable and query-relevant.
 - Avoid direct PII.
-- Use storage when you need stable `anonId` and `sessionId` across restarts.
-- In generated host-app bootstrap code, set `storage` explicitly using the storage library already installed in that project (for web, `localStorage` is enough).
+- Use `identityTrackingMode: 'consent_gated'` as the default.
+- For EU/EEA/UK user traffic, keep `identityTrackingMode: 'consent_gated'` (or `strict`) unless legal counsel approves a different setup.
+- `identify` / `setUser` only work when full tracking is enabled (`always_on`, or after `setFullTrackingConsent(true)` in `consent_gated`).
+- Do not force storage adapters in generated bootstrap code by default.
 - Avoid top-level `Promise` singletons in app utility files.
 - Use neutral file names like `analytics.ts` (not provider-specific names such as `aptabase.ts`).
 - Avoid re-exporting `PAYWALL_EVENTS` / `PURCHASE_EVENTS` from host app utility files. Import SDK constants directly when needed, or use `createPaywallTracker(...)`.
@@ -106,7 +108,7 @@ import { init } from '@analyticscli/sdk';
 const analytics = init({
   apiKey: process.env.NEXT_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY ?? '',
   platform: 'web',
-  storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+  identityTrackingMode: 'consent_gated', // default
 });
 ```
 
@@ -136,8 +138,19 @@ const analytics = init({
   debug: __DEV__,
   platform: Platform.OS,
   appVersion: Application.nativeApplicationVersion,
-  storage: AsyncStorage,
+  identityTrackingMode: 'consent_gated', // default
+  storage: AsyncStorage, // optional for RN if you want persistent IDs after consent
 });
+```
+
+Consent gate for full tracking:
+
+```ts
+// user accepts full tracking
+analytics.setFullTrackingConsent(true);
+
+// user declines full tracking (strict analytics can continue)
+analytics.setFullTrackingConsent(false);
 ```
 
 There is no "do not start yet" init flag. Tracking starts on `init(...)`; `ready()` (or `initAsync(...)`) is only for explicitly blocking first-flow logic until async storage hydration is done.

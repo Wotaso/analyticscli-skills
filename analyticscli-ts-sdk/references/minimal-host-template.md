@@ -27,7 +27,7 @@ import { init } from '@analyticscli/sdk';
 export const analytics = init({
   apiKey: process.env.NEXT_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY ?? '',
   platform: 'web',
-  storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+  identityTrackingMode: 'consent_gated', // default
 });
 ```
 
@@ -44,11 +44,22 @@ export const analytics = init({
   debug: __DEV__,
   platform: Platform.OS,
   appVersion: Application.nativeApplicationVersion,
-  storage: AsyncStorage,
+  identityTrackingMode: 'consent_gated', // default
+  storage: AsyncStorage, // optional for persistent IDs after consent
 });
 ```
 
 `ready()` does not start tracking. It is only for blocking flow transitions until async storage hydration finishes.
+
+## Full-Tracking Consent
+
+```ts
+// user accepts full tracking
+analytics.setFullTrackingConsent(true);
+
+// user declines full tracking but strict analytics can continue
+analytics.setFullTrackingConsent(false);
+```
 
 ## Call-Site Template
 

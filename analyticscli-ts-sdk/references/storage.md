@@ -1,20 +1,26 @@
 # Storage Options
 
-Storage is optional in `@analyticscli/sdk`.
+Storage behavior depends on `identityTrackingMode`.
 
-- Without storage: fastest setup, but IDs reset after app restarts.
-- With storage: stable `anonId` and `sessionId` across restarts, better continuity for retention and funnels.
+- `consent_gated` (default): strict identity behavior until `setFullTrackingConsent(true)`
+- `always_on`: persistent identity immediately
+- `strict`: no persistent identity at all
+
+Strict identity behavior means:
+- no persistent `anonId` / `sessionId` across restarts
+- no cookie/localStorage identity continuity
+- `identify(...)` / `setUser(...)` are ignored
 
 Credential source reminder:
 - Publishable ingest API key and CLI `readonly_token` come from project **API Keys** in [dash.analyticscli.com](https://dash.analyticscli.com).
 - Optional for CLI verification: set a default project once with `analyticscli projects select` (arrow-key picker), or pass `--project <project_id>` per command.
 
-## Adapter Options
+## Adapter Options (when full tracking is enabled)
 
 | Strategy | Good for | Tradeoff |
 | --- | --- | --- |
-| No adapter | Fast prototypes and short sessions | IDs reset across restarts |
-| `localStorage` | Browser host apps with no extra storage package | Browser-only API |
+| No adapter | Fast prototypes and strict behavior | IDs reset across restarts |
+| `localStorage` | Browser host apps with full tracking enabled | Browser-only API |
 | `@react-native-async-storage/async-storage` | Standard React Native persistence | Async hydration happens in background; call `ready()` only when you must block first event |
 | `react-native-mmkv` | Fast local key-value storage in RN | Native dependency |
 | Custom adapter | Existing secure or encrypted store | You own the wrapper |
@@ -24,7 +30,20 @@ Credential source reminder:
 ```ts
 import { init } from '@analyticscli/sdk';
 
-const analytics = init('<YOUR_APP_KEY>');
+const analytics = init({
+  apiKey: '<YOUR_APP_KEY>',
+  identityTrackingMode: 'consent_gated', // default
+});
+```
+
+## Full-Tracking Consent Example
+
+```ts
+// user accepts full tracking
+analytics.setFullTrackingConsent(true);
+
+// user declines full tracking but strict analytics can continue
+analytics.setFullTrackingConsent(false);
 ```
 
 ## Web localStorage Example
@@ -35,6 +54,7 @@ import { init } from '@analyticscli/sdk';
 const analytics = init({
   apiKey: process.env.NEXT_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY ?? '',
   platform: 'web',
+  identityTrackingMode: 'always_on',
   storage: typeof window !== 'undefined' ? window.localStorage : undefined,
 });
 ```
@@ -52,6 +72,7 @@ const analytics = init({
   debug: __DEV__,
   platform: Platform.OS,
   appVersion: Application.nativeApplicationVersion,
+  identityTrackingMode: 'consent_gated',
   storage: AsyncStorage,
 });
 ```
@@ -69,6 +90,7 @@ const analytics = init({
   apiKey: process.env.EXPO_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY,
   debug: __DEV__,
   platform: Platform.OS,
+  identityTrackingMode: 'consent_gated',
   storage: {
     getItem: (key) => kv.getString(key) ?? null,
     setItem: (key, value) => kv.set(key, value),
