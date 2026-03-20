@@ -85,6 +85,27 @@ paywall.purchaseSuccess({
 });
 ```
 
+For onboarding/survey in touched flows, prefer dedicated APIs:
+
+```ts
+const onboarding = analytics.createOnboardingTracker({
+  onboardingFlowId: 'onboarding_v4',
+  onboardingFlowVersion: '4.0.0',
+  isNewUser: true,
+  stepCount: 5,
+});
+
+const step = onboarding.step('welcome', 0);
+step.view();
+step.complete();
+step.surveyResponse({
+  surveyKey: 'onboarding_v4',
+  questionKey: 'primary_goal',
+  answerType: 'single_choice',
+  responseKey: 'growth',
+});
+```
+
 Create one paywall tracker per stable paywall flow context. Do not recreate a new
 `createPaywallTracker(...)` instance for every callback/event.
 If your provider exposes it, always pass an `offering` identifier in tracker defaults
@@ -128,6 +149,8 @@ Do not generate by default:
 - creating `createPaywallTracker(...)` inside every paywall callback/event helper
 - `apiKey` fallback chains using `*WRITE_KEY*` env vars in host-app code
 - duplicate screen tracking from both parent layout and child screen for the same route change
-- touching paywall/purchase instrumentation while keeping legacy custom event names as the primary signals
+- touching onboarding/paywall/purchase instrumentation while keeping legacy alias/custom event names
 - hosted paywall screens that only emit `screen(...)`/`trackScreenView(...)` and never emit `paywall:shown`
 - purchase lifecycle emitted via generic `track(...)` instead of tracker callbacks when stable paywall context is available
+- onboarding step/survey milestones emitted via generic `track(...)`/`trackEvent(...)` instead of dedicated onboarding APIs
+- dual-write to legacy providers or legacy milestone names

@@ -37,14 +37,18 @@ Avoid:
 - keeping old event aliases forever
 - generic `trackEvent(...)` proxies that hide canonical SDK APIs
 
-## Default Migration Policy For Existing Event Names
+Onboarding/survey rule for touched flows:
 
-When an implementation touches paywall/purchase tracking in an app that still has legacy custom events:
+- Use dedicated onboarding APIs (`createOnboardingTracker(...)`, `trackOnboardingEvent(...)`, `trackOnboardingSurveyResponse(...)`) instead of generic `track(...)` / `trackEvent(...)`.
+- For step milestones, prefer tracker step helpers (`step(...).view()`, `step(...).complete()`, `step(...).surveyResponse(...)`).
 
-- migrate touched call sites to canonical names in the same change by default
-- do not leave legacy names as the primary instrumentation for those flows
-- use temporary dual-write only when explicitly requested or when a short validation window is required
-- if dual-write is used, add a clear removal follow-up and keep the window time-boxed
+## No-Legacy Policy
+
+For pre-production integrations:
+
+- use canonical AnalyticsCLI events only for touched onboarding/paywall/purchase flows
+- do not keep legacy aliases or fallback event names
+- do not dual-write to old names/providers
 
 ## Required Onboarding Events
 
@@ -117,7 +121,6 @@ Track screen views for all funnel-relevant screens:
 Recommended approach:
 
 - Prefer `analytics.screen('<screen_name>', props)` for new integrations.
-- If your app already uses `screen_view`, keep that naming only during migration and standardize afterwards.
 - Include stable fields: `screen_name`, `screen_class`, `source`, `appVersion`, `platform`.
 - Prefer direct canonical calls (`trackPaywallEvent`, tracker methods) at call sites over generic `trackEvent(...)` proxy layers.
 
@@ -187,11 +190,12 @@ paywall.purchaseSuccess({
 ## Common Mistakes
 
 - non-canonical names for core paywall or purchase milestones
-- touching paywall/purchase instrumentation but leaving legacy custom names unchanged
+- legacy aliases/custom names left in touched onboarding/paywall/purchase milestones
+- onboarding step/survey milestones emitted via generic `track(...)` / `trackEvent(...)` while dedicated onboarding APIs are available
 - missing `onboardingFlowId` or `onboardingFlowVersion`
 - missing `paywallId` or `source`
 - omitting `offering` although the paywall provider exposes an offering/paywall id
 - creating a new `createPaywallTracker(...)` instance for every paywall event call
 - mixing screen-view semantics with funnel milestones
 - instrumenting only onboarding/paywall while skipping core product value events
-- keeping old analytics provider as primary after AnalyticsCLI migration
+- dual-write to old analytics providers/events
