@@ -90,6 +90,31 @@ Create one paywall tracker per stable paywall flow context. Do not recreate a ne
 If your provider exposes it, always pass an `offering` identifier in tracker defaults
 (RevenueCat offering, Adapty paywall/placement, Superwall placement/paywall id).
 
+## Hosted Paywall Screen Template
+
+When the paywall UI is hosted by a provider SDK, wire lifecycle callbacks to one screen-level tracker:
+
+```ts
+const paywall = analytics.createPaywallTracker({
+  source: screenOrigin,
+  paywallId: routeName,
+  offering: providerOfferingId,
+});
+
+paywall.shown({ fromScreen: routeName, packageId: selectedPackageId });
+paywall.purchaseStarted({ packageId: selectedPackageId });
+paywall.purchaseSuccess({ packageId: selectedPackageId });
+paywall.purchaseFailed({ packageId: selectedPackageId, error_message: message });
+paywall.purchaseCancel({ packageId: selectedPackageId });
+paywall.skip({ packageId: selectedPackageId });
+```
+
+Rules:
+
+- Do not emit paywall/purchase milestones via generic `track(...)`/`trackEvent(...)` in hosted paywall screens.
+- Do not treat `screen(...)` as replacement for `paywall:shown`.
+- If multiple paywall screens exist, each screen/context needs its own stable tracker defaults.
+
 ## Anti-Patterns
 
 Do not generate by default:
@@ -104,3 +129,5 @@ Do not generate by default:
 - `apiKey` fallback chains using `*WRITE_KEY*` env vars in host-app code
 - duplicate screen tracking from both parent layout and child screen for the same route change
 - touching paywall/purchase instrumentation while keeping legacy custom event names as the primary signals
+- hosted paywall screens that only emit `screen(...)`/`trackScreenView(...)` and never emit `paywall:shown`
+- purchase lifecycle emitted via generic `track(...)` instead of tracker callbacks when stable paywall context is available

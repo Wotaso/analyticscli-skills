@@ -3,7 +3,7 @@ name: analyticscli-ts-sdk
 description: Use when integrating or upgrading the AnalyticsCLI TypeScript SDK in web, TypeScript, React Native, or Expo apps.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.6.3","analyticscli-target":"@analyticscli/sdk","analyticscli-supported-range":">=0.1.0-preview.3 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/analyticscli-skills"}}
+metadata: {"author":"wotaso","version":"1.6.4","analyticscli-target":"@analyticscli/sdk","analyticscli-supported-range":">=0.1.0-preview.3 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/analyticscli-skills"}}
 ---
 
 # AnalyticsCLI TypeScript SDK
@@ -17,7 +17,7 @@ metadata: {"author":"wotaso","version":"1.6.3","analyticscli-target":"@analytics
 
 ## Supported Versions
 
-- Skill pack: `1.6.3`
+- Skill pack: `1.6.4`
 - Target package: `@analyticscli/sdk`
 - Supported range: `>=0.1.0-preview.3 <0.2.0`
 - If a future SDK major changes APIs or event contracts in incompatible ways, add a sibling skill such as `analyticscli-ts-sdk-v1`
@@ -54,6 +54,10 @@ See [Versioning Notes](references/versioning.md).
 - When using `createPaywallTracker(...)`, create one tracker per stable paywall context and reuse it across `shown`/`skip`/purchase calls. Recreate only when defaults change.
 - If your paywall provider exposes an offering/paywall identifier, pass it as `offering` in tracker defaults.
   RevenueCat: offering identifier; Adapty: paywall/placement identifier; Superwall: placement/paywall identifier.
+- In hosted paywall screens (RevenueCat UI / Adapty / Superwall or custom wrappers around them), do not use generic `track(...)` / `trackEvent(...)` for paywall or purchase milestones.
+  Use one memoized `createPaywallTracker(...)` per screen/context and route lifecycle callbacks to tracker methods:
+  `shown` (visible), `purchaseStarted`, one terminal event (`purchaseSuccess`/`purchaseFailed`/`purchaseCancel`), and `skip` (dismiss/close/back).
+- If multiple paywall screens exist, each screen/context must have its own stable tracker defaults (`source`, `paywallId`, optional `offering`) so events are not mixed across screens.
 - Prefer SDK identity helpers (`setUser`, `identify`, `clearUser`) directly instead of wrapping identify logic in host-app boilerplate.
 - If another analytics provider already exists, migrate it to AnalyticsCLI as the primary provider instead of running permanent dual tracking.
 - If paywall or purchase flows already emit non-canonical custom event names, migrate those call sites to canonical AnalyticsCLI event names in the same implementation change by default.
@@ -84,6 +88,8 @@ Do not generate these patterns:
 - host-side re-exports of SDK constants/events
 - creating a new `createPaywallTracker(...)` instance inside each paywall callback/event helper
 - helper wrappers that create a fresh paywall tracker per call (for example `trackPaywallTrackerEvent(...)`)
+- hosted paywall screens that only emit `screen(...)` / `trackScreenView(...)` but never emit `paywall:shown`
+- paywall/purchase milestones emitted via generic `track(...)` / `trackEvent(...)` although stable paywall context is available
 - `apiKey` fallback chains using `*WRITE_KEY*` env variables in host-app code
 - duplicate screen tracking for the same route transition from both parent layout and child screen
 
@@ -107,6 +113,9 @@ Before finishing, verify the generated integration code meets all checks:
 10. if provider exposes offering/paywall id, `createPaywallTracker(...)` defaults include `offering`
 11. exactly one screen-tracking owner exists per route transition
 12. touched paywall/purchase call sites no longer emit legacy non-canonical event names unless user explicitly requested a temporary dual-write window
+13. every touched hosted paywall screen emits `paywall:shown` via tracker when shown becomes visible (not only screen-view events)
+14. every touched hosted paywall screen maps purchase lifecycle callbacks to tracker methods (`purchaseStarted` + exactly one terminal outcome)
+15. every touched paywall dismissal path (close/back/skip) emits tracker `skip(...)`
 
 ## Dashboard Credentials Checklist
 
@@ -189,6 +198,13 @@ The integration should cover more than SDK bootstrap:
 - Keep `createPaywallTracker(...)` instance lifetime aligned to one stable paywall context (for example one screen flow); do not create a new tracker for every paywall event.
 - Include `offering` in paywall tracker defaults when available from provider metadata (RevenueCat/Adapty/Superwall).
 - Use `trackPaywallEvent(...)` for one-off paywall and purchase milestones.
+- Hosted paywall callback mapping is mandatory for touched flows:
+  - paywall visible callback -> `paywallTracker.shown(...)`
+  - purchase started callback -> `paywallTracker.purchaseStarted(...)`
+  - purchase success callback -> `paywallTracker.purchaseSuccess(...)`
+  - purchase cancelled callback -> `paywallTracker.purchaseCancel(...)`
+  - purchase error callback -> `paywallTracker.purchaseFailed(...)`
+  - close/back/dismiss callback -> `paywallTracker.skip(...)`
 - Use canonical event names from `ONBOARDING_EVENTS`, `PAYWALL_EVENTS`, and `PURCHASE_EVENTS`.
 - Keep `onboardingFlowId`, `onboardingFlowVersion`, `paywallId`, `source`, and `appVersion` stable.
 - The SDK built-in dedupe currently applies only to `onboarding:step_view` and is enabled by default (`dedupeOnboardingStepViewsPerSession: true`).

@@ -89,6 +89,22 @@ If exposed by your paywall provider, include `offering` in tracker defaults:
 - Include provider offering/paywall identifier as `offering` in tracker defaults when available.
 - If multiple callbacks can fire during re-render/re-mount, gate emissions with a session-local idempotency key.
 
+## Hosted Paywall Screens (Mandatory Mapping)
+
+For hosted paywall providers (RevenueCat UI, Adapty UI, Superwall UI) and custom host wrappers:
+
+- Do not rely on `screen(...)`/`trackScreenView(...)` as replacement for paywall milestones.
+- Create one `createPaywallTracker(...)` instance per stable screen/context (`source`, `paywallId`, optional `offering`).
+- Route lifecycle callbacks to canonical tracker calls:
+  - shown/visible callback -> `paywallTracker.shown(...)`
+  - purchase started callback -> `paywallTracker.purchaseStarted(...)`
+  - purchase success callback -> `paywallTracker.purchaseSuccess(...)`
+  - purchase cancelled callback -> `paywallTracker.purchaseCancel(...)`
+  - purchase failure callback -> `paywallTracker.purchaseFailed(...)`
+  - close/back/dismiss callback -> `paywallTracker.skip(...)`
+- If the app has multiple paywall screens, each screen needs its own stable tracker defaults.
+- Avoid generic `trackEvent('purchase_*')` / `track('paywall:*')` wrappers for hosted paywall lifecycle when tracker context is available.
+
 ## Screen View Coverage
 
 Track screen views for all funnel-relevant screens:
