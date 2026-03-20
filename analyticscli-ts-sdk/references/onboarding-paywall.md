@@ -59,6 +59,11 @@ Avoid:
 | `purchase:failed` | Purchase failed | `source`, `paywallId`, `packageId`, `appVersion` |
 | `purchase:cancel` | In-app purchase cancel intent detected | `source`, `paywallId`, `packageId`, `appVersion` |
 
+If exposed by your paywall provider, include `offering` in tracker defaults:
+- RevenueCat: offering identifier
+- Adapty: paywall/placement identifier
+- Superwall: placement/paywall identifier
+
 ## Duplicate Tracking Prevention
 
 - SDK built-in dedupe is scoped to `onboarding:step_view` only and is enabled by default (`dedupeOnboardingStepViewsPerSession: true`).
@@ -71,6 +76,8 @@ Avoid:
   - `purchase:failed`
   - `purchase:success`
 - Use `createPaywallTracker(...)` so events share one `paywallEntryId`; this improves correlation and duplicate detection in analysis, but it does not dedupe automatically.
+- Reuse a single `createPaywallTracker(...)` instance for one stable paywall flow context. Do not recreate a tracker for every event callback.
+- Include provider offering/paywall identifier as `offering` in tracker defaults when available.
 - If multiple callbacks can fire during re-render/re-mount, gate emissions with a session-local idempotency key.
 
 ## Screen View Coverage
@@ -130,6 +137,7 @@ const onboarding = analytics.createOnboardingTracker({
 const paywall = analytics.createPaywallTracker({
   source: 'onboarding',
   paywallId: 'default_paywall',
+  offering: 'rc_main', // RevenueCat example
   appVersion: '1.8.0',
 });
 const welcomeStep = onboarding.step('welcome', 0);
@@ -156,6 +164,8 @@ paywall.purchaseSuccess({
 - non-canonical names for core paywall or purchase milestones
 - missing `onboardingFlowId` or `onboardingFlowVersion`
 - missing `paywallId` or `source`
+- omitting `offering` although the paywall provider exposes an offering/paywall id
+- creating a new `createPaywallTracker(...)` instance for every paywall event call
 - mixing screen-view semantics with funnel milestones
 - instrumenting only onboarding/paywall while skipping core product value events
 - keeping old analytics provider as primary after AnalyticsCLI migration

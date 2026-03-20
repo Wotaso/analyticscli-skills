@@ -64,23 +64,30 @@ analytics.setFullTrackingConsent(false);
 ## Call-Site Template
 
 ```ts
-import { PAYWALL_EVENTS, PURCHASE_EVENTS } from '@analyticscli/sdk';
 import { analytics } from '@/utils/analytics';
+
+const paywall = analytics.createPaywallTracker({
+  source: 'onboarding',
+  paywallId: 'default_paywall',
+  offering: 'rc_main',
+  appVersion: '1.0.0',
+});
 
 analytics.screen('onboarding_region');
 
-analytics.trackPaywallEvent(PAYWALL_EVENTS.SHOWN, {
-  source: 'onboarding',
-  paywallId: 'default_paywall',
+paywall.shown({
   fromScreen: 'onboarding_offer',
 });
 
-analytics.trackPaywallEvent(PURCHASE_EVENTS.SUCCESS, {
-  source: 'onboarding',
-  paywallId: 'default_paywall',
+paywall.purchaseSuccess({
   packageId: 'annual',
 });
 ```
+
+Create one paywall tracker per stable paywall flow context. Do not recreate a new
+`createPaywallTracker(...)` instance for every callback/event.
+If your provider exposes it, always pass an `offering` identifier in tracker defaults
+(RevenueCat offering, Adapty paywall/placement, Superwall placement/paywall id).
 
 ## Anti-Patterns
 
@@ -92,3 +99,6 @@ Do not generate by default:
 - `Promise<AnalyticsClient | null>` bootstrap patterns
 - `platform: 'react-native'` (use canonical `ios`/`android`/`mac`/`windows`/`web` or omit)
 - explicit `endpoint` in host app code
+- creating `createPaywallTracker(...)` inside every paywall callback/event helper
+- `apiKey` fallback chains using `*WRITE_KEY*` env vars in host-app code
+- duplicate screen tracking from both parent layout and child screen for the same route change

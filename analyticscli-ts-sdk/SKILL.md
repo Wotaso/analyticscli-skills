@@ -3,7 +3,7 @@ name: analyticscli-ts-sdk
 description: Use when integrating or upgrading the AnalyticsCLI TypeScript SDK in web, TypeScript, React Native, or Expo apps.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.6.0","analyticscli-target":"@analyticscli/sdk","analyticscli-supported-range":">=0.1.0-preview.3 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/analyticscli-skills"}}
+metadata: {"author":"wotaso","version":"1.6.2","analyticscli-target":"@analyticscli/sdk","analyticscli-supported-range":">=0.1.0-preview.3 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/analyticscli-skills"}}
 ---
 
 # AnalyticsCLI TypeScript SDK
@@ -17,7 +17,7 @@ metadata: {"author":"wotaso","version":"1.6.0","analyticscli-target":"@analytics
 
 ## Supported Versions
 
-- Skill pack: `1.6.0`
+- Skill pack: `1.6.2`
 - Target package: `@analyticscli/sdk`
 - Supported range: `>=0.1.0-preview.3 <0.2.0`
 - If a future SDK major changes APIs or event contracts in incompatible ways, add a sibling skill such as `analyticscli-ts-sdk-v1`
@@ -27,10 +27,12 @@ See [Versioning Notes](references/versioning.md).
 ## Core Rules
 
 - Initialize exactly once near app bootstrap.
-- Prefer `init('<YOUR_APP_KEY>')` shortform for the smallest setup.
+- For generated host-app code, prefer object init with explicit identity mode (`init({ apiKey, identityTrackingMode: 'consent_gated', ... })`).
+- `init('<YOUR_APP_KEY>')` shortform is acceptable for quick demos/tests.
 - `initFromEnv(...)` is also valid when env-first bootstrap is preferred.
 - Keep init options minimal: all init attributes are optional; `apiKey` is enough for ingest.
 - In host apps, use client-safe publishable env names (for example `ANALYTICSCLI_PUBLISHABLE_API_KEY`).
+- Do not use `WRITE_KEY` env names in generated host-app snippets (`ANALYTICSCLI_WRITE_KEY`, `EXPO_PUBLIC_ANALYTICSCLI_WRITE_KEY`, etc.).
 - `runtimeEnv` is auto-attached. Do not pass a `mode` string.
 - `debug` is only a boolean for SDK console logging.
 - Do not pass `endpoint` and do not add endpoint env vars in app templates. Use the SDK default collector endpoint.
@@ -42,13 +44,16 @@ See [Versioning Notes](references/versioning.md).
 - Prefer SDK trackers over host-side wrapper utilities. Keep integration code close to call sites.
 - Keep event properties stable and query-relevant.
 - Avoid direct PII.
-- Use `identityTrackingMode: 'consent_gated'` as the default.
+- Set `identityTrackingMode` explicitly in generated host-app bootstrap code; use `'consent_gated'` as the default.
 - For EU/EEA/UK user traffic, keep `identityTrackingMode: 'consent_gated'` (or `strict`) unless legal counsel approves a different setup.
 - `identify` / `setUser` only work when full tracking is enabled (`always_on`, or after `setFullTrackingConsent(true)` in `consent_gated`).
 - Do not force storage adapters in generated bootstrap code by default.
 - Avoid top-level `Promise` singletons in app utility files.
 - Use neutral file names like `analytics.ts` (not provider-specific names such as `aptabase.ts`).
 - Avoid re-exporting `PAYWALL_EVENTS` / `PURCHASE_EVENTS` from host app utility files. Import SDK constants directly when needed, or use `createPaywallTracker(...)`.
+- When using `createPaywallTracker(...)`, create one tracker per stable paywall context and reuse it across `shown`/`skip`/purchase calls. Recreate only when defaults change.
+- If your paywall provider exposes an offering/paywall identifier, pass it as `offering` in tracker defaults.
+  RevenueCat: offering identifier; Adapty: paywall/placement identifier; Superwall: placement/paywall identifier.
 - Prefer SDK identity helpers (`setUser`, `identify`, `clearUser`) directly instead of wrapping identify logic in host-app boilerplate.
 - If another analytics provider already exists, migrate it to AnalyticsCLI as the primary provider instead of running permanent dual tracking.
 - For generated docs or README snippets, write from tenant developer perspective (`your app`, `your workspace`) and avoid provider-centric phrasing such as `our SaaS`.
@@ -64,6 +69,7 @@ When this skill writes host-app code, optimize for low boilerplate by default.
 - Do not add per-call `try/catch` wrappers around every analytics helper unless the user asked for that policy.
 - Do not duplicate SDK constants/events in host utility files.
 - Prefer direct SDK calls in feature code (`trackPaywallEvent`, tracker helpers, `screen`, `track`) instead of generic proxy helpers.
+- Keep a single screen-tracking owner per route boundary (parent layout or screen component, not both).
 - If a thin `analytics.ts` is needed, keep it focused to bootstrap + a few shared helpers. Avoid becoming an event-translation layer.
 
 ## Hard Fail Patterns
@@ -75,6 +81,10 @@ Do not generate these patterns:
 - broad catch-all wrappers around every analytics call
 - top-level `Promise<AnalyticsClient | null>` bootstrap patterns
 - host-side re-exports of SDK constants/events
+- creating a new `createPaywallTracker(...)` instance inside each paywall callback/event helper
+- helper wrappers that create a fresh paywall tracker per call (for example `trackPaywallTrackerEvent(...)`)
+- `apiKey` fallback chains using `*WRITE_KEY*` env variables in host-app code
+- duplicate screen tracking for the same route transition from both parent layout and child screen
 
 If such a pattern already exists in the target codebase:
 - do not expand it
@@ -90,6 +100,11 @@ Before finishing, verify the generated integration code meets all checks:
 4. SDK APIs used directly at call sites for onboarding/paywall/purchase milestones
 5. identity uses SDK methods directly (`identify`/`setUser`/`clearUser`) without extra wrappers
 6. `platform` is `web`/`ios`/`android`/`mac`/`windows` or omitted (never framework labels)
+7. generated bootstrap sets `identityTrackingMode` explicitly (default `'consent_gated'`)
+8. paywall flow reuses a tracker instance per stable paywall context (no per-event tracker re-creation)
+9. host-app snippets only use publishable API key env names (no `*WRITE_KEY*` fallback)
+10. if provider exposes offering/paywall id, `createPaywallTracker(...)` defaults include `offering`
+11. exactly one screen-tracking owner exists per route transition
 
 ## Dashboard Credentials Checklist
 
@@ -169,6 +184,8 @@ The integration should cover more than SDK bootstrap:
 
 - Use `createOnboardingTracker(...)` for onboarding flows.
 - Use `createPaywallTracker(...)` when paywall context is stable in a flow (`source`, `paywallId`, experiment variant).
+- Keep `createPaywallTracker(...)` instance lifetime aligned to one stable paywall context (for example one screen flow); do not create a new tracker for every paywall event.
+- Include `offering` in paywall tracker defaults when available from provider metadata (RevenueCat/Adapty/Superwall).
 - Use `trackPaywallEvent(...)` for one-off paywall and purchase milestones.
 - Use canonical event names from `ONBOARDING_EVENTS`, `PAYWALL_EVENTS`, and `PURCHASE_EVENTS`.
 - Keep `onboardingFlowId`, `onboardingFlowVersion`, `paywallId`, `source`, and `appVersion` stable.
