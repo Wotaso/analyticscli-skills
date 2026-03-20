@@ -37,6 +37,15 @@ Avoid:
 - keeping old event aliases forever
 - generic `trackEvent(...)` proxies that hide canonical SDK APIs
 
+## Default Migration Policy For Existing Event Names
+
+When an implementation touches paywall/purchase tracking in an app that still has legacy custom events:
+
+- migrate touched call sites to canonical names in the same change by default
+- do not leave legacy names as the primary instrumentation for those flows
+- use temporary dual-write only when explicitly requested or when a short validation window is required
+- if dual-write is used, add a clear removal follow-up and keep the window time-boxed
+
 ## Required Onboarding Events
 
 | Event | When to send | Required properties |
@@ -162,6 +171,7 @@ paywall.purchaseSuccess({
 ## Common Mistakes
 
 - non-canonical names for core paywall or purchase milestones
+- touching paywall/purchase instrumentation but leaving legacy custom names unchanged
 - missing `onboardingFlowId` or `onboardingFlowVersion`
 - missing `paywallId` or `source`
 - omitting `offering` although the paywall provider exposes an offering/paywall id

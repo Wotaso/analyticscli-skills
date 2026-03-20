@@ -9,6 +9,7 @@ Keep host code small and explicit:
 - one bootstrap location
 - direct SDK calls in feature code
 - no large translation layer
+- canonical onboarding/paywall/purchase event names at touched call sites
 
 ## Dashboard Credentials
 
@@ -102,3 +103,4 @@ Do not generate by default:
 - creating `createPaywallTracker(...)` inside every paywall callback/event helper
 - `apiKey` fallback chains using `*WRITE_KEY*` env vars in host-app code
 - duplicate screen tracking from both parent layout and child screen for the same route change
+- touching paywall/purchase instrumentation while keeping legacy custom event names as the primary signals

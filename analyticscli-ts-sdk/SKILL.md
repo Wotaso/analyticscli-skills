@@ -3,7 +3,7 @@ name: analyticscli-ts-sdk
 description: Use when integrating or upgrading the AnalyticsCLI TypeScript SDK in web, TypeScript, React Native, or Expo apps.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.6.2","analyticscli-target":"@analyticscli/sdk","analyticscli-supported-range":">=0.1.0-preview.3 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/analyticscli-skills"}}
+metadata: {"author":"wotaso","version":"1.6.3","analyticscli-target":"@analyticscli/sdk","analyticscli-supported-range":">=0.1.0-preview.3 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/analyticscli-skills"}}
 ---
 
 # AnalyticsCLI TypeScript SDK
@@ -17,7 +17,7 @@ metadata: {"author":"wotaso","version":"1.6.2","analyticscli-target":"@analytics
 
 ## Supported Versions
 
-- Skill pack: `1.6.2`
+- Skill pack: `1.6.3`
 - Target package: `@analyticscli/sdk`
 - Supported range: `>=0.1.0-preview.3 <0.2.0`
 - If a future SDK major changes APIs or event contracts in incompatible ways, add a sibling skill such as `analyticscli-ts-sdk-v1`
@@ -56,6 +56,7 @@ See [Versioning Notes](references/versioning.md).
   RevenueCat: offering identifier; Adapty: paywall/placement identifier; Superwall: placement/paywall identifier.
 - Prefer SDK identity helpers (`setUser`, `identify`, `clearUser`) directly instead of wrapping identify logic in host-app boilerplate.
 - If another analytics provider already exists, migrate it to AnalyticsCLI as the primary provider instead of running permanent dual tracking.
+- If paywall or purchase flows already emit non-canonical custom event names, migrate those call sites to canonical AnalyticsCLI event names in the same implementation change by default.
 - For generated docs or README snippets, write from tenant developer perspective (`your app`, `your workspace`) and avoid provider-centric phrasing such as `our SaaS`.
 - Default to canonical SDK event names at call sites.
 - Before generating host-app code, ensure `@analyticscli/sdk` is upgraded to the newest preview in that repo.
@@ -105,6 +106,7 @@ Before finishing, verify the generated integration code meets all checks:
 9. host-app snippets only use publishable API key env names (no `*WRITE_KEY*` fallback)
 10. if provider exposes offering/paywall id, `createPaywallTracker(...)` defaults include `offering`
 11. exactly one screen-tracking owner exists per route transition
+12. touched paywall/purchase call sites no longer emit legacy non-canonical event names unless user explicitly requested a temporary dual-write window
 
 ## Dashboard Credentials Checklist
 
@@ -201,6 +203,15 @@ When existing analytics code is present (for example Aptabase, Firebase Analytic
 1. Replace the old provider as the default event sink with AnalyticsCLI.
 2. Prefer migrating call sites to canonical AnalyticsCLI event names directly.
 3. Use temporary dual-write only during a defined migration window and remove it after validation.
+
+## Legacy Event Name Migration Rule
+
+When existing paywall/purchase instrumentation uses custom names (for example `purchase_completed`, `view_paywall`, `purchase_error`):
+
+1. Migrate touched paywall/purchase call sites to canonical names in the same implementation by default.
+2. Prefer SDK helpers (`createPaywallTracker(...)`, `trackPaywallEvent(...)`) over ad-hoc string events.
+3. Keep temporary dual-write only when explicitly requested by the user or required for a brief validation window.
+4. If dual-write is used, time-box it and include a removal note in the same task output.
 
 ## Validation Loop
 
