@@ -138,6 +138,34 @@ Beyond funnel milestones, add events for high-value functionality that signals a
 | `restore:completed` | Restore flow completed | `source`, `restoredEntitlements`, `appVersion` |
 | `restore:failed` | Restore flow failed | `source`, `errorCode`, `appVersion` |
 
+## RevenueCat Lifecycle Correlation
+
+For RevenueCat-powered apps, split analytics into two complementary layers:
+
+1. **Client journey events** via SDK tracker methods (`paywall:*`, `purchase:*`) for in-app intent.
+2. **Server lifecycle events** from RevenueCat webhooks for subscription truth (trial start/cancel, renewal, churn).
+
+Identity and correlation rules:
+
+- Use one stable user id across both systems (`RevenueCat appUserID` == AnalyticsCLI `setUser(...)` id).
+- Keep `offering`, `paywallId`, `packageId`, and `entitlementKey` on paywall/purchase events.
+- For webhook-derived events, include RevenueCat payload identifiers (event id/type + transaction/subscription identifiers) so retries can be deduped and timelines can be joined.
+
+Suggested webhook-derived event names:
+
+- `billing:trial_started`
+- `billing:trial_cancelled`
+- `billing:trial_converted`
+- `billing:subscription_renewed`
+- `billing:subscription_cancelled`
+- `billing:subscription_expired`
+- `billing:billing_issue`
+
+Important limitation:
+
+- "Perfect real-time sync" is not guaranteed (store delays, offline clients, webhook retries).
+- Design for eventual consistency and idempotent ingestion to get reliable analytics.
+
 ## Order Rules
 
 Onboarding:

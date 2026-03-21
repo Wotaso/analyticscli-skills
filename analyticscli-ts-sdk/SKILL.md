@@ -199,6 +199,43 @@ The integration should cover more than SDK bootstrap:
 3. screen views for core routes/screens
 4. key product actions tied to user value (for example: first calibration complete, first result generated, export/share, restore purchases)
 5. stable context properties (`appVersion`, `platform`, `source`, flow identifiers)
+6. if using RevenueCat, correlate client-side paywall/purchase intent with server-side subscription lifecycle updates
+
+## RevenueCat + Analytics Sync (Trials & Subscriptions)
+
+You can include trial/purchase/cancel lifecycle data inside user flows, but "perfectly synced in real time"
+is not realistic because app callbacks, store billing events, retries, and webhook delivery are eventually consistent.
+
+Use this pattern for near-lossless correlation:
+
+1. **Single identity key across both systems**
+   - Use the same stable app user id for RevenueCat `appUserID` and AnalyticsCLI `setUser(...)`.
+   - Do not rely on anonymous ids alone for subscription lifecycle analysis.
+2. **Dual event streams**
+   - Client stream (SDK): paywall and purchase journey intent (`paywall:shown`, `purchase:started`, `purchase:success`/`failed`/`cancel`).
+   - Server stream (RevenueCat webhook): authoritative billing lifecycle changes (trial started, trial cancelled, renewal, subscription cancelled/expired, billing issue).
+3. **Correlation keys on every relevant event**
+   - Always include stable keys when available: `userId`, `offering`, `paywallId`, `packageId`, `entitlementKey`.
+   - For webhook-derived events, also include RevenueCat identifiers from payload (`rcEventId`, `rcEventType`, original transaction/subscription ids, environment/store).
+4. **Webhook idempotency is mandatory**
+   - Deduplicate webhook ingestion by RevenueCat event id before emitting analytics events.
+   - Replays/retries must not create duplicate cancellation or renewal events.
+5. **Model cancellation reasons explicitly**
+   - Persist store/webhook cancellation reason fields when provided (or `unknown`).
+   - Cancellation can happen outside the app; only webhook ingestion gives reliable coverage.
+
+Recommended custom lifecycle events (in addition to canonical `purchase:*` journey events):
+- `billing:trial_started`
+- `billing:trial_cancelled`
+- `billing:trial_converted`
+- `billing:subscription_renewed`
+- `billing:subscription_cancelled`
+- `billing:subscription_expired`
+- `billing:billing_issue`
+
+This split lets funnels answer both questions:
+- **Journey intent:** "what users did in-app before purchase/cancel"
+- **Billing truth:** "what subscription state changed in the store/backend"
 
 ## Instrumentation Rules
 
