@@ -18,6 +18,7 @@ npx skills add wotaso/analyticscli-skills
 | --- | --- | --- |
 | `analyticscli-cli` | Query analytics, validate instrumentation, export bounded data | `@analyticscli/cli` `^0.1.0` |
 | `analyticscli-ts-sdk` | Integrate or upgrade the JS/TS SDK in web, React Native, or Expo apps | `@analyticscli/sdk` `>=0.1.0-preview.0 <0.2.0` |
+| `openclaw-growth-engineer` | Turn analytics + code context into prioritized GitHub issues (MVP autopilot) | local workflow (`scripts/openclaw-growth-engineer.mjs`) |
 
 ## Versioning Policy
 
