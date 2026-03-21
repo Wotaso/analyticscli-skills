@@ -18,8 +18,9 @@ npx skills add wotaso/analyticscli-skills
 | --- | --- | --- |
 | `analyticscli-cli` | Query analytics, validate instrumentation, export bounded data | `@analyticscli/cli` `^0.1.0` |
 | `analyticscli-ts-sdk` | Integrate or upgrade the JS/TS SDK in web, React Native, or Expo apps | `@analyticscli/sdk` `>=0.1.0-preview.0 <0.2.0` |
-| `product-manager-skill` | Convert product signals into prioritized PM outputs (PRDs, experiments, roadmap decisions) | cross-functional workflow |
-| `openclaw-growth-engineer` | Turn analytics + code context into prioritized GitHub issues (MVP autopilot) | local workflow (`scripts/openclaw-growth-engineer.mjs`) |
+| `product-manager-skill` | Convert product signals into prioritized PM outputs and implementation-ready GitHub issues (merged PM + growth-autopilot workflow) | cross-functional workflow + local autopilot (`scripts/openclaw-growth-engineer.mjs`) |
+
+Legacy alias (backward compatibility only): `openclaw-growth-engineer` -> `product-manager-skill`.
 
 ## Versioning Policy
 
