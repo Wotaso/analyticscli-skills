@@ -68,6 +68,9 @@ See [Versioning Notes](references/versioning.md).
   `createOnboardingTracker(...)`, `trackOnboardingEvent(...)`, `trackOnboardingSurveyResponse(...)`,
   plus step helpers (`step(...).view()`, `step(...).complete()`, `step(...).surveyResponse(...)`).
 - For onboarding survey events, prefer `trackOnboardingSurveyResponse(...)` (or tracker survey helpers) so SDK sanitization/normalization is preserved.
+- To avoid repetitive payloads, create one onboarding tracker with shared flow defaults and use `step(...).surveyResponse(...)` with only survey-specific fields at call sites.
+- For React Native / Expo non-onboarding screens, track screen views on focus with `useFocusEffect(...)` and `analytics.screen(...)`.
+- For RevenueCat correlation in host apps, keep AnalyticsCLI user identity in sync with the same stable user id used in `Purchases.logIn(...)` (`setUser` on sign-in/session restore, `clearUser` on sign-out).
 
 ## Host App Minimalism Guardrails
 
@@ -125,6 +128,7 @@ Before finishing, verify the generated integration code meets all checks:
 15. every touched paywall dismissal path (close/back/skip) emits tracker `skip(...)`
 16. touched onboarding step milestones use dedicated onboarding APIs (tracker step helpers or `trackOnboardingEvent(...)`) instead of generic `track(...)`
 17. touched onboarding survey milestones use `trackOnboardingSurveyResponse(...)` (or tracker survey helpers), not ad-hoc generic `track(...)` payloads
+18. touched React Native / Expo non-onboarding screens use `useFocusEffect(...)` + `analytics.screen(...)` with one owner per route transition
 
 ## Dashboard Credentials Checklist
 
@@ -190,6 +194,34 @@ analytics.setFullTrackingConsent(false);
 
 There is no "do not start yet" init flag. Tracking starts on `init(...)`; `ready()` (or `initAsync(...)`) is only for explicitly blocking first-flow logic until async storage hydration is done.
 
+## React Native Screen Tracking Pattern (Non-Onboarding)
+
+Use `useFocusEffect(...)` for non-onboarding screens so screen views fire on route focus and not only on mount:
+
+```ts
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+import { analytics } from '@/utils/analytics';
+
+export function SettingsScreen() {
+  useFocusEffect(
+    useCallback(() => {
+      analytics.screen('settings', {
+        screen_class: 'SettingsScreen',
+        source: 'tabs',
+      });
+    }, []),
+  );
+
+  return null;
+}
+```
+
+Notes:
+- Keep exactly one screen-tracking owner per route transition.
+- Do not emit duplicate screen events from both parent layout and child screen.
+- For onboarding steps, do not replace onboarding milestone events with screen events.
+
 ## Integration Depth Checklist
 
 The integration should cover more than SDK bootstrap:
@@ -242,6 +274,8 @@ This split lets funnels answer both questions:
 - Use `createOnboardingTracker(...)` for onboarding flows.
 - For onboarding steps in touched flows, prefer `createOnboardingTracker(...).step(...).view()/complete()` over generic `track(...)`.
 - For onboarding surveys in touched flows, prefer `trackOnboardingSurveyResponse(...)` or tracker survey helpers over generic `track(...)`.
+- Prefer tracker defaults for repeated fields in onboarding/survey flows; avoid re-sending unchanged flow metadata at every call site.
+- For React Native / Expo non-onboarding screens, use `useFocusEffect(...)` to call `analytics.screen(...)` on focus.
 - Use `createPaywallTracker(...)` when paywall context is stable in a flow (`source`, `paywallId`, experiment variant).
 - Keep `createPaywallTracker(...)` instance lifetime aligned to one stable paywall context (for example one screen flow); do not create a new tracker for every paywall event.
 - Include `offering` in paywall tracker defaults when available from provider metadata (RevenueCat/Adapty/Superwall).

@@ -52,6 +52,34 @@ export const analytics = init({
 
 `ready()` does not start tracking. It is only for blocking flow transitions until async storage hydration finishes.
 
+## React Native Non-Onboarding Screen Tracking
+
+For React Native / Expo screens outside onboarding, track screen views on focus:
+
+```ts
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+import { analytics } from '@/utils/analytics';
+
+export function ResultsScreen() {
+  useFocusEffect(
+    useCallback(() => {
+      analytics.screen('results', {
+        screen_class: 'ResultsScreen',
+        source: 'tabs',
+      });
+    }, []),
+  );
+
+  return null;
+}
+```
+
+Rules:
+
+- Use one screen-tracking owner per route transition (parent layout or child screen, not both).
+- Keep onboarding milestones on dedicated onboarding APIs; do not replace them with screen-only events.
+
 ## Full-Tracking Consent
 
 ```ts
@@ -99,11 +127,23 @@ const step = onboarding.step('welcome', 0);
 step.view();
 step.complete();
 step.surveyResponse({
-  surveyKey: 'onboarding_v4',
+  // shared flow fields come from tracker defaults
+  surveyKey: 'onboarding_main',
   questionKey: 'primary_goal',
   answerType: 'single_choice',
   responseKey: 'growth',
 });
+```
+
+For repeated survey steps, keep payloads minimal by reusing tracker defaults instead of passing
+`onboardingFlowId`/`onboardingFlowVersion`/`stepCount`/`isNewUser` on every call.
+
+For RevenueCat flows, keep identity aligned:
+
+```ts
+analytics.setUser(appUserId); // same id passed to Purchases.logIn(appUserId)
+// ...
+analytics.clearUser(); // on sign-out
 ```
 
 Create one paywall tracker per stable paywall flow context. Do not recreate a new

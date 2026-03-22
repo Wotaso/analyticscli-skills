@@ -41,6 +41,7 @@ Onboarding/survey rule for touched flows:
 
 - Use dedicated onboarding APIs (`createOnboardingTracker(...)`, `trackOnboardingEvent(...)`, `trackOnboardingSurveyResponse(...)`) instead of generic `track(...)` / `trackEvent(...)`.
 - For step milestones, prefer tracker step helpers (`step(...).view()`, `step(...).complete()`, `step(...).surveyResponse(...)`).
+- For survey responses in repeated flows, prefer one tracker with shared defaults and call `step(...).surveyResponse(...)` with only survey-specific fields.
 
 ## No-Legacy Policy
 
@@ -108,6 +109,10 @@ For hosted paywall providers (RevenueCat UI, Adapty UI, Superwall UI) and custom
   - close/back/dismiss callback -> `paywallTracker.skip(...)`
 - If the app has multiple paywall screens, each screen needs its own stable tracker defaults.
 - Avoid generic `trackEvent('purchase_*')` / `track('paywall:*')` wrappers for hosted paywall lifecycle when tracker context is available.
+- In RevenueCat callbacks, prefer provider-native identifiers for correlation:
+  - `packageId` from `packageBeingPurchased.identifier`
+  - `productId` from `packageBeingPurchased.product.identifier`
+  - `offering` from RevenueCat offering identifier in tracker defaults
 
 ## Screen View Coverage
 
@@ -121,8 +126,28 @@ Track screen views for all funnel-relevant screens:
 Recommended approach:
 
 - Prefer `analytics.screen('<screen_name>', props)` for new integrations.
+- In React Native / Expo non-onboarding screens, prefer `useFocusEffect(...)` to call `analytics.screen(...)` on focus.
 - Include stable fields: `screen_name`, `screen_class`, `source`, `appVersion`, `platform`.
 - Prefer direct canonical calls (`trackPaywallEvent`, tracker methods) at call sites over generic `trackEvent(...)` proxy layers.
+
+Example (React Native / Expo non-onboarding screen):
+
+```ts
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+import { analytics } from '@/utils/analytics';
+
+export function SettingsScreen() {
+  useFocusEffect(
+    useCallback(() => {
+      analytics.screen('settings', {
+        screen_class: 'SettingsScreen',
+        source: 'tabs',
+      });
+    }, []),
+  );
+}
+```
 
 ## Important Product Action Events
 
