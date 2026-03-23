@@ -3,7 +3,7 @@ name: analyticscli-ts-sdk
 description: Use when integrating or upgrading the AnalyticsCLI TypeScript SDK in web, TypeScript, React Native, or Expo apps.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.6.6","analyticscli-target":"@analyticscli/sdk","analyticscli-supported-range":">=0.1.0-preview.3 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/analyticscli-skills"}}
+metadata: {"author":"wotaso","version":"1.6.7","analyticscli-target":"@analyticscli/sdk","analyticscli-supported-range":">=0.1.0-preview.6 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/analyticscli-skills"}}
 ---
 
 # AnalyticsCLI TypeScript SDK
@@ -17,9 +17,9 @@ metadata: {"author":"wotaso","version":"1.6.6","analyticscli-target":"@analytics
 
 ## Supported Versions
 
-- Skill pack: `1.6.6`
+- Skill pack: `1.6.7`
 - Target package: `@analyticscli/sdk`
-- Supported range: `>=0.1.0-preview.3 <0.2.0`
+- Supported range: `>=0.1.0-preview.6 <0.2.0`
 - If a future SDK major changes APIs or event contracts in incompatible ways, add a sibling skill such as `analyticscli-ts-sdk-v1`
 
 See [Versioning Notes](references/versioning.md).
@@ -27,10 +27,9 @@ See [Versioning Notes](references/versioning.md).
 ## Core Rules
 
 - Initialize exactly once near app bootstrap.
-- For generated host-app code, prefer object init with explicit identity mode (`init({ apiKey, identityTrackingMode: 'consent_gated', ... })`).
-- `init('<YOUR_APP_KEY>')` shortform is acceptable for quick demos/tests.
-- `initFromEnv(...)` is also valid when env-first bootstrap is preferred.
-- Keep init options minimal: all init attributes are optional; `apiKey` is enough for ingest.
+- For generated host-app code, prefer `createAnalyticsContext({ client: { ... } })` with explicit identity mode (`identityTrackingMode: 'consent_gated'`).
+- `init('<YOUR_APP_KEY>')` shortform is acceptable for quick demos/tests or low-level client-only integrations.
+- Keep setup options minimal: `apiKey` is enough for ingest.
 - In host apps, use client-safe publishable env names (for example `ANALYTICSCLI_PUBLISHABLE_API_KEY`).
 - Do not use `WRITE_KEY` env names in generated host-app snippets (`ANALYTICSCLI_WRITE_KEY`, `EXPO_PUBLIC_ANALYTICSCLI_WRITE_KEY`, etc.).
 - `runtimeEnv` is auto-attached. Do not pass a `mode` string.
@@ -46,7 +45,7 @@ See [Versioning Notes](references/versioning.md).
 - Avoid direct PII.
 - Set `identityTrackingMode` explicitly in generated host-app bootstrap code; use `'consent_gated'` as the default.
 - For EU/EEA/UK user traffic, keep `identityTrackingMode: 'consent_gated'` (or `strict`) unless legal counsel approves a different setup.
-- `identify` / `setUser` only work when full tracking is enabled (`always_on`, or after `setFullTrackingConsent(true)` in `consent_gated`).
+- `identify` / `setUser` (`analytics.user.identify(...)` / `analytics.user.set(...)` in context API) only work when full tracking is enabled (`always_on`, or after full-tracking consent in `consent_gated`).
 - Do not force storage adapters in generated bootstrap code by default.
 - Avoid top-level `Promise` singletons in app utility files.
 - Use neutral file names like `analytics.ts` (not provider-specific names such as `aptabase.ts`).
@@ -111,7 +110,7 @@ If such a pattern already exists in the target codebase:
 
 Before finishing, verify the generated integration code meets all checks:
 
-1. bootstrap uses `init('<API_KEY>')`, `init({...})`, or `initFromEnv(...)` (latest supported minimal equivalent)
+1. bootstrap uses `createAnalyticsContext({ client: { ... } })` or `init(...)` (no `initFromEnv(...)`)
 2. no explicit `endpoint` env var in host app templates
 3. no large event translation layer added
 4. SDK APIs used directly at call sites for onboarding/paywall/purchase milestones
@@ -142,27 +141,20 @@ Before SDK bootstrap, collect the required values from your dashboard:
 ## Minimal Web Setup
 
 ```ts
-import { init } from '@analyticscli/sdk';
+import { createAnalyticsContext } from '@analyticscli/sdk';
 
-const analytics = init({
-  apiKey: process.env.NEXT_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY ?? '',
-  platform: 'web',
-  identityTrackingMode: 'consent_gated', // default
+const analytics = createAnalyticsContext({
+  client: {
+    apiKey: process.env.NEXT_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY ?? '',
+    platform: 'web',
+    identityTrackingMode: 'consent_gated', // default
+  },
 });
 ```
 
-`init(...)` accepts:
-- shortform string: `init('<YOUR_APP_KEY>')`
-- object form: `init({ apiKey: '<YOUR_APP_KEY>', ...optionalConfig })`
-
-`initFromEnv(...)` default env key lookup order:
-- API key: `ANALYTICSCLI_PUBLISHABLE_API_KEY`, `NEXT_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY`, `EXPO_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY`, `VITE_ANALYTICSCLI_PUBLISHABLE_API_KEY`
-
-If the host app uses custom env naming, set `apiKeyEnvKeys` explicitly.
-
-Missing config behavior:
-- default is safe no-op client when API key is missing
-- use `missingConfigMode: 'throw'` when startup should fail fast
+`createAnalyticsContext(...)` is preferred for host apps.
+`init(...)` remains valid for low-level client-only integrations.
+Resolve env values in app code and pass `apiKey` explicitly.
 
 ## React Native Setup
 
@@ -170,15 +162,17 @@ Missing config behavior:
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Application from 'expo-application';
 import { Platform } from 'react-native';
-import { init } from '@analyticscli/sdk';
+import { createAnalyticsContext } from '@analyticscli/sdk';
 
-const analytics = init({
-  apiKey: process.env.EXPO_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY,
-  debug: __DEV__,
-  platform: Platform.OS,
-  appVersion: Application.nativeApplicationVersion,
-  identityTrackingMode: 'consent_gated', // default
-  storage: AsyncStorage, // optional for RN if you want persistent IDs after consent
+const analytics = createAnalyticsContext({
+  client: {
+    apiKey: process.env.EXPO_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY,
+    debug: __DEV__,
+    platform: Platform.OS,
+    appVersion: Application.nativeApplicationVersion,
+    identityTrackingMode: 'consent_gated', // default
+    storage: AsyncStorage, // optional for RN if you want persistent IDs after consent
+  },
 });
 ```
 
@@ -186,13 +180,13 @@ Consent gate for full tracking:
 
 ```ts
 // user accepts full tracking
-analytics.setFullTrackingConsent(true);
+analytics.consent.setFullTracking(true);
 
 // user declines full tracking (strict analytics can continue)
-analytics.setFullTrackingConsent(false);
+analytics.consent.setFullTracking(false);
 ```
 
-There is no "do not start yet" init flag. Tracking starts on `init(...)`; `ready()` (or `initAsync(...)`) is only for explicitly blocking first-flow logic until async storage hydration is done.
+There is no "do not start yet" init flag. Tracking starts on `createAnalyticsContext(...)` / `init(...)`; `ready()` (or `initAsync(...)`) is only for explicitly blocking first-flow logic until async storage hydration is done.
 
 ## React Native Screen Tracking Pattern (Non-Onboarding)
 
@@ -241,7 +235,7 @@ is not realistic because app callbacks, store billing events, retries, and webho
 Use this pattern for near-lossless correlation:
 
 1. **Single identity key across both systems**
-   - Use the same stable app user id for RevenueCat `appUserID` and AnalyticsCLI `setUser(...)`.
+   - Use the same stable app user id for RevenueCat `appUserID` and AnalyticsCLI `analytics.user.set(...)` (or `setUser(...)` on raw client).
    - Do not rely on anonymous ids alone for subscription lifecycle analysis.
 2. **Dual event streams**
    - Client stream (SDK): paywall and purchase journey intent (`paywall:shown`, `purchase:started`, `purchase:success`/`failed`/`cancel`).
