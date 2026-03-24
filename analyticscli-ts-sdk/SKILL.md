@@ -38,6 +38,10 @@ See [Versioning Notes](references/versioning.md).
 - For `platform`, do not use framework labels (`react-native`, `expo`).
 - Use only canonical platform values (`web`, `ios`, `android`, `mac`, `windows`) or omit the field.
 - In React Native/Expo, pass `Platform.OS` directly; the SDK normalizes values like `macos -> mac` and `win32 -> windows`.
+- Treat `platform` as runtime family only (`web`/`ios`/`android`/`mac`/`windows`), not as OS version/name.
+- Treat `osName` as operating-system label (for example `iOS`, `Android`, `Windows`, `macOS`, `Web`). Prefer always setting/populating `osName`; keep `platform` optional.
+- `init(...)`/`new AnalyticsClient(...)` auto-emits one `session_start` event per client instance on SDK mount (`source: sdk_mount`), so host apps do not need manual startup wiring.
+- Do not manually emit duplicate `session_start` unless you intentionally also track a separate custom launch event (for example `app_launch`).
 - In React Native/Expo, prefer `appVersion` from `expo-application` (`nativeApplicationVersion`); nullable values can be passed directly.
 - Do not specify `dedupeOnboardingStepViewsPerSession` in generated host-app code by default; SDK default is `true`. Only set it explicitly when the user requests a different behavior or asks for explicit config.
 - Prefer SDK trackers over host-side wrapper utilities. Keep integration code close to call sites.
