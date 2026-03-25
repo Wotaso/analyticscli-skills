@@ -27,7 +27,7 @@ See [Versioning Notes](references/versioning.md).
 ## Core Rules
 
 - Initialize exactly once near app bootstrap.
-- For generated host-app code, prefer `createAnalyticsContext({ client: { ... } })` with explicit identity mode (`identityTrackingMode: 'consent_gated'`).
+- For generated host-app code, prefer `init({ ... })` with explicit identity mode (`identityTrackingMode: 'consent_gated'`).
 - `init('<YOUR_APP_KEY>')` shortform is acceptable for quick demos/tests or low-level client-only integrations.
 - Keep setup options minimal: `apiKey` is enough for ingest.
 - In host apps, use client-safe publishable env names (for example `ANALYTICSCLI_PUBLISHABLE_API_KEY`).
@@ -51,7 +51,7 @@ See [Versioning Notes](references/versioning.md).
 - Avoid direct PII.
 - Set `identityTrackingMode` explicitly in generated host-app bootstrap code; use `'consent_gated'` as the default.
 - For EU/EEA/UK user traffic, keep `identityTrackingMode: 'consent_gated'` (or `strict`) unless legal counsel approves a different setup.
-- `identify` / `setUser` (`analytics.user.identify(...)` / `analytics.user.set(...)` in context API) only work when full tracking is enabled (`always_on`, or after full-tracking consent in `consent_gated`).
+- `identify` / `setUser` only work when full tracking is enabled (`always_on`, or after full-tracking consent in `consent_gated`).
 - Do not force storage adapters in generated bootstrap code by default.
 - Avoid top-level `Promise` singletons in app utility files.
 - Use neutral file names like `analytics.ts` (not provider-specific names such as `aptabase.ts`).
@@ -116,7 +116,7 @@ If such a pattern already exists in the target codebase:
 
 Before finishing, verify the generated integration code meets all checks:
 
-1. bootstrap uses `createAnalyticsContext({ client: { ... } })` or `init(...)` (no `initFromEnv(...)`)
+1. bootstrap uses `init({ ... })` (no `initFromEnv(...)`)
 2. no explicit `endpoint` env var in host app templates
 3. no large event translation layer added
 4. SDK APIs used directly at call sites for onboarding/paywall/purchase milestones
@@ -147,19 +147,16 @@ Before SDK bootstrap, collect the required values from your dashboard:
 ## Minimal Web Setup
 
 ```ts
-import { createAnalyticsContext } from '@analyticscli/sdk';
+import { init } from '@analyticscli/sdk';
 
-const analytics = createAnalyticsContext({
-  client: {
-    apiKey: process.env.NEXT_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY ?? '',
-    platform: 'web',
-    identityTrackingMode: 'consent_gated', // default
-  },
+const analytics = init({
+  apiKey: process.env.NEXT_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY ?? '',
+  platform: 'web',
+  identityTrackingMode: 'consent_gated', // default
 });
 ```
 
-`createAnalyticsContext(...)` is preferred for host apps.
-`init(...)` remains valid for low-level client-only integrations.
+`init(...)` is preferred for host apps.
 Resolve env values in app code and pass `apiKey` explicitly.
 
 ## React Native Setup
@@ -168,17 +165,15 @@ Resolve env values in app code and pass `apiKey` explicitly.
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Application from 'expo-application';
 import { Platform } from 'react-native';
-import { createAnalyticsContext } from '@analyticscli/sdk';
+import { init } from '@analyticscli/sdk';
 
-const analytics = createAnalyticsContext({
-  client: {
-    apiKey: process.env.EXPO_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY,
-    debug: __DEV__,
-    platform: Platform.OS,
-    appVersion: Application.nativeApplicationVersion,
-    identityTrackingMode: 'consent_gated', // default
-    storage: AsyncStorage, // optional for RN if you want persistent IDs after consent
-  },
+const analytics = init({
+  apiKey: process.env.EXPO_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY,
+  debug: __DEV__,
+  platform: Platform.OS,
+  appVersion: Application.nativeApplicationVersion,
+  identityTrackingMode: 'consent_gated', // default
+  storage: AsyncStorage, // optional for RN if you want persistent IDs after consent
 });
 ```
 
@@ -186,13 +181,13 @@ Consent gate for full tracking:
 
 ```ts
 // user accepts full tracking
-analytics.consent.setFullTracking(true);
+analytics.setFullTrackingConsent(true);
 
 // user declines full tracking (strict analytics can continue)
-analytics.consent.setFullTracking(false);
+analytics.setFullTrackingConsent(false);
 ```
 
-There is no "do not start yet" init flag. Tracking starts on `createAnalyticsContext(...)` / `init(...)`; `ready()` (or `initAsync(...)`) is only for explicitly blocking first-flow logic until async storage hydration is done.
+There is no "do not start yet" init flag. Tracking starts on `init(...)`; `ready()` (or `initAsync(...)`) is only for explicitly blocking first-flow logic until async storage hydration is done.
 
 ## React Native Screen Tracking Pattern (Non-Onboarding)
 
@@ -241,7 +236,7 @@ is not realistic because app callbacks, store billing events, retries, and webho
 Use this pattern for near-lossless correlation:
 
 1. **Single identity key across both systems**
-   - Use the same stable app user id for RevenueCat `appUserID` and AnalyticsCLI `analytics.user.set(...)` (or `setUser(...)` on raw client).
+   - Use the same stable app user id for RevenueCat `appUserID` and AnalyticsCLI `analytics.setUser(...)` (or `setUser(...)` on raw client).
    - Do not rely on anonymous ids alone for subscription lifecycle analysis.
 2. **Dual event streams**
    - Client stream (SDK): paywall and purchase journey intent (`paywall:shown`, `purchase:started`, `purchase:success`/`failed`/`cancel`).

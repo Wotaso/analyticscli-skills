@@ -23,14 +23,12 @@ Before bootstrap code is added:
 ## Bootstrap Template (Web)
 
 ```ts
-import { createAnalyticsContext } from '@analyticscli/sdk';
+import { init } from '@analyticscli/sdk';
 
-export const analytics = createAnalyticsContext({
-  client: {
-    apiKey: process.env.NEXT_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY ?? '',
-    platform: 'web',
-    identityTrackingMode: 'consent_gated', // default
-  },
+export const analytics = init({
+  apiKey: process.env.NEXT_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY ?? '',
+  platform: 'web',
+  identityTrackingMode: 'consent_gated', // default
 });
 ```
 
@@ -40,17 +38,15 @@ export const analytics = createAnalyticsContext({
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Application from 'expo-application';
 import { Platform } from 'react-native';
-import { createAnalyticsContext } from '@analyticscli/sdk';
+import { init } from '@analyticscli/sdk';
 
-export const analytics = createAnalyticsContext({
-  client: {
-    apiKey: process.env.EXPO_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY,
-    debug: __DEV__,
-    platform: Platform.OS,
-    appVersion: Application.nativeApplicationVersion,
-    identityTrackingMode: 'consent_gated', // default
-    storage: AsyncStorage, // optional for persistent IDs after consent
-  },
+export const analytics = init({
+  apiKey: process.env.EXPO_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY,
+  debug: __DEV__,
+  platform: Platform.OS,
+  appVersion: Application.nativeApplicationVersion,
+  identityTrackingMode: 'consent_gated', // default
+  storage: AsyncStorage, // optional for persistent IDs after consent
 });
 ```
 
@@ -90,10 +86,10 @@ Rules:
 
 ```ts
 // user accepts full tracking
-analytics.consent.setFullTracking(true);
+analytics.setFullTrackingConsent(true);
 
 // user declines full tracking but strict analytics can continue
-analytics.consent.setFullTracking(false);
+analytics.setFullTrackingConsent(false);
 ```
 
 ## Call-Site Template
@@ -101,7 +97,7 @@ analytics.consent.setFullTracking(false);
 ```ts
 import { analytics } from '@/utils/analytics';
 
-const paywall = analytics.createPaywall({
+const paywall = analytics.createPaywallTracker({
   source: 'onboarding',
   paywallId: 'default_paywall',
   offering: 'rc_main',
@@ -122,7 +118,7 @@ paywall.purchaseSuccess({
 For onboarding/survey in touched flows, prefer dedicated APIs:
 
 ```ts
-const onboarding = analytics.createOnboarding({
+const onboarding = analytics.createOnboardingTracker({
   onboardingFlowId: 'onboarding_v4',
   onboardingFlowVersion: '4.0.0',
   isNewUser: true,
@@ -147,13 +143,13 @@ For repeated survey steps, keep payloads minimal by reusing tracker defaults ins
 For RevenueCat flows, keep identity aligned:
 
 ```ts
-analytics.user.set(appUserId); // same id passed to Purchases.logIn(appUserId)
+analytics.setUser(appUserId); // same id passed to Purchases.logIn(appUserId)
 // ...
-analytics.user.clear(); // on sign-out
+analytics.clearUser(); // on sign-out
 ```
 
 Create one paywall tracker per stable paywall flow context. Do not recreate a new
-`createPaywall(...)` instance for every callback/event.
+`createPaywallTracker(...)` instance for every callback/event.
 If your provider exposes it, always pass an `offering` identifier in tracker defaults
 (RevenueCat offering, Adapty paywall/placement, Superwall placement/paywall id).
 
@@ -162,7 +158,7 @@ If your provider exposes it, always pass an `offering` identifier in tracker def
 When the paywall UI is hosted by a provider SDK, wire lifecycle callbacks to one screen-level tracker:
 
 ```ts
-const paywall = analytics.createPaywall({
+const paywall = analytics.createPaywallTracker({
   source: screenOrigin,
   paywallId: routeName,
   offering: providerOfferingId,
@@ -192,7 +188,7 @@ Do not generate by default:
 - `Promise<AnalyticsClient | null>` bootstrap patterns
 - `platform: 'react-native'` (use canonical `ios`/`android`/`mac`/`windows`/`web` or omit)
 - explicit `endpoint` in host app code
-- creating `createPaywall(...)` inside every paywall callback/event helper
+- creating `createPaywallTracker(...)` inside every paywall callback/event helper
 - `apiKey` fallback chains using `*WRITE_KEY*` env vars in host-app code
 - duplicate screen tracking from both parent layout and child screen for the same route change
 - touching onboarding/paywall/purchase instrumentation while keeping legacy alias/custom event names

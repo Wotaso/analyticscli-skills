@@ -27,7 +27,7 @@ Available constants:
 
 Use a thin host integration:
 
-- one SDK bootstrap (`createAnalyticsContext({ client: { ... } })` or `init(...)`)
+- one SDK bootstrap (`init({ ... })`)
 - direct tracker/event calls in feature code
 - minimal shared helpers only when multiple call sites truly reuse the same payload shape
 
