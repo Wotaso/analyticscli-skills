@@ -51,27 +51,30 @@ For pre-production integrations:
 - do not keep legacy aliases or fallback event names
 - do not dual-write to old names/providers
 
-## Required Onboarding Events
+## Core Onboarding Events
 
 | Event | When to send | Required properties |
 | --- | --- | --- |
-| `onboarding:start` | User starts onboarding flow | `onboardingFlowId`, `onboardingFlowVersion`, `isNewUser`, `appVersion` |
+| `onboarding:start` | User starts onboarding flow | `onboardingFlowId`, `onboardingFlowVersion`, `isNewUser` |
 | `onboarding:step_view` | A distinct onboarding step becomes visible | flow props plus `stepKey`, `stepIndex`, `stepCount` |
-| `onboarding:step_complete` | User completes a step action | flow props plus `stepKey`, `stepIndex`, `stepCount` |
+| `onboarding:step_complete` | Optional: user completes a step action | flow props plus `stepKey`, `stepIndex`, `stepCount` |
 | `onboarding:complete` | Onboarding ends successfully | flow props |
 | `onboarding:skip` | User exits or skips onboarding | flow props |
 | `onboarding:survey_response` | Survey answer captured | `surveyKey`, `questionKey`, `answerType`, `responseKey`, plus flow props |
+
+For low-noise onboarding funnels, you can keep `onboarding:step_view` and omit
+`onboarding:step_complete` where completion semantics are weak.
 
 ## Required Paywall And Purchase Events
 
 | Event | When to send | Required properties |
 | --- | --- | --- |
-| `paywall:shown` | Paywall is visible | `source`, `paywallId`, `fromScreen`, `appVersion` |
-| `paywall:skip` | User dismisses or skips paywall | `source`, `paywallId`, `appVersion` |
-| `purchase:started` | Purchase flow started | `source`, `paywallId`, `packageId`, `appVersion` |
-| `purchase:success` | Purchase succeeded | `source`, `paywallId`, `packageId`, `appVersion` |
-| `purchase:failed` | Purchase failed | `source`, `paywallId`, `packageId`, `appVersion` |
-| `purchase:cancel` | In-app purchase cancel intent detected | `source`, `paywallId`, `packageId`, `appVersion` |
+| `paywall:shown` | Paywall is visible | `source`, `paywallId`, `fromScreen` |
+| `paywall:skip` | User dismisses or skips paywall | `source`, `paywallId` |
+| `purchase:started` | Purchase flow started | `source`, `paywallId`, `packageId` |
+| `purchase:success` | Purchase succeeded | `source`, `paywallId`, `packageId` |
+| `purchase:failed` | Purchase failed | `source`, `paywallId`, `packageId` |
+| `purchase:cancel` | In-app purchase cancel intent detected | `source`, `paywallId`, `packageId` |
 
 If exposed by your paywall provider, include `offering` in tracker defaults:
 - RevenueCat: offering identifier
@@ -82,7 +85,8 @@ If exposed by your paywall provider, include `offering` in tracker defaults:
 
 - SDK built-in dedupe includes `onboarding:step_view` (`dedupeOnboardingStepViewsPerSession: true`, default).
 - SDK also dedupes immediate duplicate `screen:*` events (`dedupeScreenViewsPerSession: true`, default).
-- `screenViewDedupeWindowMs` controls the screen dedupe window (default `1200` ms).
+- SDK additionally dedupes immediate overlap between onboarding `screen:*` and `onboarding:step_view` for the same step (`dedupeOnboardingScreenStepViewOverlapsPerSession: true`, default).
+- `screenViewDedupeWindowMs` controls both screen dedupe and onboarding screen/step overlap dedupe (default `1200` ms).
 - SDK does not automatically dedupe paywall or purchase events.
 - Assign a single owner for each funnel boundary (route-level or component-level, not both).
 - Do not track the same screen transition from both parent layout and child screen hooks.
@@ -129,7 +133,8 @@ Recommended approach:
 
 - Prefer `analytics.screen('<screen_name>', props)` for new integrations.
 - In React Native / Expo non-onboarding screens, prefer `useFocusEffect(...)` to call `analytics.screen(...)` on focus.
-- Include stable fields: `screen_name`, `screen_class`, `source`, `appVersion`, `platform`.
+- Include stable fields: `screen_name`, `screen_class`, `source`, `platform`.
+- Prefer app-level `init({ appVersion })` once; avoid sending `appVersion` repeatedly in event properties.
 - Prefer direct canonical calls (`trackPaywallEvent`, tracker methods) at call sites over generic `trackEvent(...)` proxy layers.
 
 Example (React Native / Expo non-onboarding screen):
@@ -210,7 +215,6 @@ Paywall journey:
 
 ```ts
 const onboarding = analytics.createOnboardingTracker({
-  appVersion: '1.8.0',
   isNewUser: true,
   onboardingFlowId: 'onboarding_v4',
   onboardingFlowVersion: '4.0.0',
@@ -221,7 +225,6 @@ const paywall = analytics.createPaywallTracker({
   source: 'onboarding',
   paywallId: 'default_paywall',
   offering: 'rc_main', // RevenueCat example
-  appVersion: '1.8.0',
 });
 const welcomeStep = onboarding.step('welcome', 0);
 

@@ -284,7 +284,7 @@ This split lets funnels answer both questions:
   - close/back/dismiss callback -> `paywallTracker.skip(...)`
 - Use canonical event names from `ONBOARDING_EVENTS`, `PAYWALL_EVENTS`, and `PURCHASE_EVENTS`.
 - Keep `onboardingFlowId`, `onboardingFlowVersion`, `paywallId`, `source`, and `appVersion` stable.
-- The SDK built-in dedupe covers `onboarding:step_view` (`dedupeOnboardingStepViewsPerSession: true`, default) and immediate duplicate `screen(...)` calls (`dedupeScreenViewsPerSession: true`, default; window `screenViewDedupeWindowMs`, default `1200` ms).
+- The SDK built-in dedupe covers `onboarding:step_view` (`dedupeOnboardingStepViewsPerSession: true`, default), immediate duplicate `screen(...)` calls (`dedupeScreenViewsPerSession: true`, default; window `screenViewDedupeWindowMs`, default `1200` ms), and immediate overlap between onboarding `screen:*` and `onboarding:step_view` for the same step (`dedupeOnboardingScreenStepViewOverlapsPerSession: true`, default).
 - Prevent duplicate tracking for the same user action across nested layouts/components.
 - Use a single tracking owner per route or lifecycle boundary; if multiple hooks can fire, gate with a session-local idempotency key.
 - For each paywall attempt, emit each milestone once (`paywall:shown`, `purchase:started`, and one terminal event: `purchase:cancel` or `purchase:failed` or `purchase:success`).
