@@ -84,6 +84,7 @@ If exposed by your paywall provider, include `offering` in tracker defaults:
 ## Duplicate Tracking Prevention
 
 - SDK built-in dedupe includes `onboarding:step_view` (`dedupeOnboardingStepViewsPerSession: true`, default).
+- Emitting a new `onboarding:start` in the same session resets onboarding step-view dedupe state.
 - SDK also dedupes immediate duplicate `screen:*` events (`dedupeScreenViewsPerSession: true`, default).
 - SDK additionally dedupes immediate overlap between onboarding `screen:*` and `onboarding:step_view` for the same step (`dedupeOnboardingScreenStepViewOverlapsPerSession: true`, default).
 - `screenViewDedupeWindowMs` controls both screen dedupe and onboarding screen/step overlap dedupe (default `1200` ms).
