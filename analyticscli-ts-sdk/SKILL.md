@@ -3,7 +3,7 @@ name: analyticscli-ts-sdk
 description: Use when integrating or upgrading the AnalyticsCLI TypeScript SDK in web, TypeScript, React Native, or Expo apps.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.6.7","analyticscli-target":"@analyticscli/sdk","analyticscli-supported-range":">=0.1.0-preview.6 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/analyticscli-skills"}}
+metadata: {"author":"wotaso","version":"1.6.8","analyticscli-target":"@analyticscli/sdk","analyticscli-supported-range":">=0.1.0-preview.6 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/analyticscli-skills"}}
 ---
 
 # AnalyticsCLI TypeScript SDK
@@ -17,7 +17,7 @@ metadata: {"author":"wotaso","version":"1.6.7","analyticscli-target":"@analytics
 
 ## Supported Versions
 
-- Skill pack: `1.6.7`
+- Skill pack: `1.6.8`
 - Target package: `@analyticscli/sdk`
 - Supported range: `>=0.1.0-preview.6 <0.2.0`
 - If a future SDK major changes APIs or event contracts in incompatible ways, add a sibling skill such as `analyticscli-ts-sdk-v1`
@@ -44,6 +44,8 @@ See [Versioning Notes](references/versioning.md).
 - Do not manually emit duplicate `session_start` unless you intentionally also track a separate custom launch event (for example `app_launch`).
 - In React Native/Expo, prefer `appVersion` from `expo-application` (`nativeApplicationVersion`); nullable values can be passed directly.
 - Do not specify `dedupeOnboardingStepViewsPerSession` in generated host-app code by default; SDK default is `true`. Only set it explicitly when the user requests a different behavior or asks for explicit config.
+- Do not specify `dedupeScreenViewsPerSession` in generated host-app code by default; SDK default is `true`. Only set it explicitly when the user requests a different behavior or asks for explicit config.
+- Set `screenViewDedupeWindowMs` only when needed for a non-standard navigation stack; otherwise rely on SDK default (`1200` ms).
 - Prefer SDK trackers over host-side wrapper utilities. Keep integration code close to call sites.
 - Keep event properties stable and query-relevant.
 - Avoid direct PII.
@@ -287,7 +289,7 @@ This split lets funnels answer both questions:
   - close/back/dismiss callback -> `paywallTracker.skip(...)`
 - Use canonical event names from `ONBOARDING_EVENTS`, `PAYWALL_EVENTS`, and `PURCHASE_EVENTS`.
 - Keep `onboardingFlowId`, `onboardingFlowVersion`, `paywallId`, `source`, and `appVersion` stable.
-- The SDK built-in dedupe currently applies only to `onboarding:step_view` and is enabled by default (`dedupeOnboardingStepViewsPerSession: true`).
+- The SDK built-in dedupe covers `onboarding:step_view` (`dedupeOnboardingStepViewsPerSession: true`, default) and immediate duplicate `screen(...)` calls (`dedupeScreenViewsPerSession: true`, default; window `screenViewDedupeWindowMs`, default `1200` ms).
 - Prevent duplicate tracking for the same user action across nested layouts/components.
 - Use a single tracking owner per route or lifecycle boundary; if multiple hooks can fire, gate with a session-local idempotency key.
 - For each paywall attempt, emit each milestone once (`paywall:shown`, `purchase:started`, and one terminal event: `purchase:cancel` or `purchase:failed` or `purchase:success`).

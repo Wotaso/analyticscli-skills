@@ -80,8 +80,10 @@ If exposed by your paywall provider, include `offering` in tracker defaults:
 
 ## Duplicate Tracking Prevention
 
-- SDK built-in dedupe is scoped to `onboarding:step_view` only and is enabled by default (`dedupeOnboardingStepViewsPerSession: true`).
-- SDK does not automatically dedupe paywall, purchase, or `screen:*` events.
+- SDK built-in dedupe includes `onboarding:step_view` (`dedupeOnboardingStepViewsPerSession: true`, default).
+- SDK also dedupes immediate duplicate `screen:*` events (`dedupeScreenViewsPerSession: true`, default).
+- `screenViewDedupeWindowMs` controls the screen dedupe window (default `1200` ms).
+- SDK does not automatically dedupe paywall or purchase events.
 - Assign a single owner for each funnel boundary (route-level or component-level, not both).
 - Do not track the same screen transition from both parent layout and child screen hooks.
 - For each paywall attempt, emit one `paywall:shown`.

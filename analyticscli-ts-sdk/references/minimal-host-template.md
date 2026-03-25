@@ -82,6 +82,8 @@ export function ResultsScreen() {
 Rules:
 
 - Use one screen-tracking owner per route transition (parent layout or child screen, not both).
+- Keep SDK screen dedupe defaults enabled (`dedupeScreenViewsPerSession: true`) as a safety net for accidental double-fired hooks.
+- Adjust `screenViewDedupeWindowMs` only when navigation behavior requires it (default `1200` ms).
 - Keep onboarding milestones on dedicated onboarding APIs; do not replace them with screen-only events.
 
 ## Full-Tracking Consent
