@@ -64,6 +64,8 @@ For pre-production integrations:
 
 For low-noise onboarding funnels, you can keep `onboarding:step_view` and omit
 `onboarding:step_complete` where completion semantics are weak.
+For survey steps, a lean default is `onboarding:step_view` + `onboarding:survey_response`;
+add `onboarding:step_complete` only when there is a real completion boundary (explicit submit/continue confirmation or async success).
 
 ## Required Paywall And Purchase Events
 
