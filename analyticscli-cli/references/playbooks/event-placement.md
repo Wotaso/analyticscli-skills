@@ -18,7 +18,6 @@ Track only high-leverage product moments so analytics stays actionable and stabl
 - `paywall:shown`
 - `purchase:success`
 - `review_prompt:shown`
-- `feedback_submitted`
 
 ## Dedicated Events: Onboarding to Paywall to Subscription
 
