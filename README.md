@@ -27,6 +27,20 @@ The PM/autopilot skill is distributed from its dedicated repository:
 npx skills add Wotaso/ai-product-manager-skill
 ```
 
+## OpenClaw Growth Engineer
+
+For OpenClaw/ClawHub users who want the mobile-focused growth autopilot directly as a dedicated skill slug:
+
+```bash
+npx -y clawhub install openclaw-growth-engineer
+```
+
+This skill is OpenClaw-first and supports:
+
+- GitHub issue or draft-PR creation
+- extra mobile connectors such as GlitchTip and ASC CLI
+- repo-proposal branches under `.openclaw/proposals/...`
+
 ## Versioning Policy
 
 - `metadata.version` inside a `SKILL.md` is the version of the skill instructions.
