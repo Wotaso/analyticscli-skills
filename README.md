@@ -14,9 +14,9 @@ npx skills add wotaso/analyticscli-skills
 
 ## Included Skills
 
-| Skill | Use it for | Target package |
-| --- | --- | --- |
-| `analyticscli-cli` | Query analytics, validate instrumentation, export bounded data | `@analyticscli/cli` `^0.1.0` |
+| Skill                 | Use it for                                                            | Target package                                 |
+| --------------------- | --------------------------------------------------------------------- | ---------------------------------------------- |
+| `analyticscli-cli`    | Query analytics, validate instrumentation, export bounded data        | `@analyticscli/cli` `^0.1.0`                   |
 | `analyticscli-ts-sdk` | Integrate or upgrade the JS/TS SDK in web, React Native, or Expo apps | `@analyticscli/sdk` `>=0.1.0-preview.0 <0.2.0` |
 
 ## Product Manager Skill
@@ -32,7 +32,7 @@ npx skills add Wotaso/ai-product-manager-skill
 For OpenClaw/ClawHub users who want the mobile-focused growth autopilot directly as a dedicated skill slug:
 
 ```bash
-npx -y clawhub install openclaw-growth-engineer
+npx  clawhub install openclaw-growth-engineer
 ```
 
 This skill is OpenClaw-first and supports:
