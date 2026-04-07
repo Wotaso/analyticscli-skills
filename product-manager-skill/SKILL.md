@@ -3,7 +3,7 @@ name: product-manager-skill
 description: Turn analytics and customer signals into prioritized product decisions, PRD drafts, experiment plans, and implementation-ready GitHub backlog issues or draft proposal PRs.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"0.8.2","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills"}}
+metadata: {"author":"wotaso","version":"0.8.6","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"],"env":["GITHUB_TOKEN"]},"primaryEnv":"GITHUB_TOKEN"}}
 ---
 
 # Product Manager Skill
@@ -63,10 +63,7 @@ Before running issue generation/autopilot mode, verify and report:
 - Secrets:
   - `GITHUB_TOKEN` (required baseline; fine-grained PAT with repository `Issues: Read/Write`, `Contents: Read`)
   - `ANALYTICSCLI_READONLY_TOKEN` (recommended; required for non-keychain CLI auth)
-  - `REVENUECAT_API_KEY`
-  - `SENTRY_AUTH_TOKEN`
-- optional `FEEDBACK_API_TOKEN`
-- optional connector-specific env vars used by `sources.extra[]`
+  - connector-specific read-only tokens only when those optional connectors are enabled
 
 If anything is missing, stop autopilot and return a concrete "missing items" list with where to obtain each value.
 
@@ -89,7 +86,8 @@ This protocol must work even when the user prompt is vague and even when repo-sp
    - If any check fails, return only a concrete blocker checklist with exact fix commands.
 2. Portable mode execution:
    - run first pass directly via `analyticscli` commands (bounded, deterministic)
-   - generate 3-5 prioritized issue drafts and create GitHub issues or draft pull requests when allowed
+   - generate 3-5 prioritized issue drafts by default
+   - create GitHub issues or draft pull requests only when config explicitly enables `actions.autoCreateIssues=true` or `actions.autoCreatePullRequests=true`
 3. After run:
    - report whether drafts were generated and whether GitHub issues or PRs were created
    - include command to repeat the same run path

@@ -44,7 +44,8 @@ It should execute:
 1. Run portable startup checks first-class:
    - validate `analyticscli` + auth + `GITHUB_TOKEN` + repo detection
    - run bounded `analyticscli` queries
-   - generate prioritized issue drafts and create GitHub issues when allowed
+   - generate prioritized issue drafts by default
+   - create GitHub issues only when `actions.autoCreateIssues=true` is explicitly configured
 2. Missing local repo scripts must never block startup.
 3. If blockers exist: stop and return concrete missing/failing items (no manual summary intake).
 
@@ -215,7 +216,7 @@ python3 scripts/openclaw-growth-charts.py \
   --manifest data/openclaw-growth-engineer/charts.manifest.json
 ```
 
-Generate and auto-create GitHub issues:
+Generate and explicitly auto-create GitHub issues:
 
 ```bash
 GITHUB_TOKEN=ghp_xxx node scripts/openclaw-growth-engineer.mjs \
