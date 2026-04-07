@@ -75,8 +75,7 @@ Before running setup, collect required values from your dashboard:
 Preferred:
 
 ```bash
-npm i -g @analyticscli/cli
-analyticscli setup
+npx -y @analyticscli/cli@preview setup
 # Paste readonly token only when prompted; do not pass token as a command argument.
 ```
 

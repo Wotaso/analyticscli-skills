@@ -58,7 +58,7 @@ Important:
 Install AnalyticsCLI tools:
 
 ```bash
-npm i -g @analyticscli/cli
+npx -y @analyticscli/cli@preview --help
 npm i @analyticscli/sdk@preview
 ```
 

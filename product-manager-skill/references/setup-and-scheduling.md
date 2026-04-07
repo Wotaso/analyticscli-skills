@@ -5,7 +5,7 @@ This is the recommended production-safe baseline for running growth autopilot on
 ## 1) Install Dependencies
 
 ```bash
-npm i -g @analyticscli/cli
+npx -y @analyticscli/cli@preview --help
 python3 -m pip install matplotlib
 ```
 

@@ -32,7 +32,7 @@ npx skills add Wotaso/ai-product-manager-skill
 For ClawHub users, the canonical published skill is:
 
 ```bash
-npx -y clawhub install ai-product-manager
+npx clawhub install ai-product-manager
 ```
 
 ## Versioning Policy
