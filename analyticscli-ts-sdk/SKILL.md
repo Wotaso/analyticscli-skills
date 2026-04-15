@@ -79,6 +79,15 @@ See [Versioning Notes](references/versioning.md).
 - For React Native / Expo non-onboarding screens, track screen views on focus with `useFocusEffect(...)` and `analytics.screen(...)`.
 - For RevenueCat correlation in host apps, keep AnalyticsCLI user identity in sync with the same stable user id used in `Purchases.logIn(...)` (`setUser` on sign-in/session restore, `clearUser` on sign-out).
 
+## Feedback Collection Rules
+
+- If the app collects qualitative feedback, prefer the SDK `feedback` config plus `submitFeedback(...)` instead of a separate ad-hoc client.
+- Always include both a stable `locationId` and a human-readable `originName`.
+- `locationId` should stay code-stable (`settings/restore`, `onboarding/paywall`).
+- `originName` should explain the exact product surface or UI origin (`restore purchases footer`, `paywall dismiss modal`).
+- For AnalyticsCLI-backed feedback, point `feedback.serviceUrl` at the AnalyticsCLI API or a tenant-owned proxy and use a project-scoped public feedback key. `appId` is optional unless the target endpoint requires it.
+- Do not put privileged feedback secrets into mobile binaries.
+
 ## Host App Minimalism Guardrails
 
 When this skill writes host-app code, optimize for low boilerplate by default.

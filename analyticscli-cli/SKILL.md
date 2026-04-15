@@ -12,6 +12,7 @@ metadata: {"author":"wotaso","version":"1.0.0","analyticscli-target":"@analytics
 
 - querying product analytics for a AnalyticsCLI project
 - validating whether SDK instrumentation landed correctly
+- reviewing or submitting project feedback through AnalyticsCLI
 - answering onboarding, paywall, survey, retention, or export questions without raw SQL
 
 ## Supported Versions
@@ -54,6 +55,21 @@ Prefer these command families first:
 - `generic`
 
 Only use `events export` when the user explicitly needs raw CSV.
+
+## Feedback Commands
+
+Use these when the task involves product feedback:
+
+```bash
+analyticscli feedback list --last 30d --format json
+analyticscli feedback summary --last 30d --format json
+analyticscli feedback submit --category bug --message "Short symptom" --origin-name "dashboard feedback form" --location-id "dashboard/feedback"
+```
+
+Rules:
+- prefer `feedback summary --format json` when another tool or skill needs a bounded theme summary
+- prefer `feedback list --format json` when exact raw messages matter
+- always include `origin-name` and `location-id` on submit when they are known
 
 ## Data Fidelity Rules
 
@@ -125,15 +141,14 @@ If the requested fetch is impossible with the current CLI surface:
 
 1. State that the capability is missing.
 2. Do not pretend another command is equivalent if it is not.
-3. Submit CLI feedback with a reproducible gap report to the external feedback service.
+3. Submit CLI feedback with a reproducible gap report to the AnalyticsCLI feedback store.
 
 ```bash
 analyticscli feedback submit \
   --category feature \
-  --service-url "$ANALYTICSCLI_FEEDBACK_SERVICE_URL" \
-  --service-key "$ANALYTICSCLI_FEEDBACK_SERVICE_API_KEY" \
-  --app-id "$ANALYTICSCLI_FEEDBACK_SERVICE_APP_ID" \
   --message "Missing CLI functionality: <short capability>" \
+  --origin-name "analyticscli cli" \
+  --location-id "analyticscli-cli" \
   --context "Requested fetch: <what user asked>; attempted command: <command>" \
   --meta '{"expected":"<expected output>","actual":"CLI has no command or endpoint"}'
 ```
