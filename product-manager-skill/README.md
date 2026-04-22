@@ -65,6 +65,7 @@ npm i @analyticscli/sdk@preview
 
 Notes:
 
+- The CLI npm package is `@analyticscli/cli@preview`; `analyticscli` is only the installed binary name.
 - The SDK package is currently published on `@preview`.
 - When stable releases are available, use `@analyticscli/sdk` without a dist-tag.
 - RevenueCat data is expected via RevenueCat MCP/agent export to `revenuecat_summary.json`.
