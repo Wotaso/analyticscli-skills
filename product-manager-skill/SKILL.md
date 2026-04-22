@@ -3,7 +3,7 @@ name: product-manager-skill
 description: OpenClaw-first AI product manager for turning analytics, revenue, crash, store, and feedback signals into execution-ready proposals and backlog work.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.0.7","analyticscli-target":"@analyticscli/cli","analyticscli-supported-range":">=0.1.2-preview.0 <0.2.0","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"]},"install":[{"id":"analyticscli-cli","kind":"node","package":"@analyticscli/cli@preview","bins":["analyticscli"],"label":"Install AnalyticsCLI CLI (npm package @analyticscli/cli@preview)"}]}}
+metadata: {"author":"wotaso","version":"1.0.10","analyticscli-target":"@analyticscli/cli","analyticscli-supported-range":">=0.1.2-preview.0 <0.2.0","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"]},"install":[{"id":"analyticscli-cli","kind":"node","package":"@analyticscli/cli@preview","bins":["analyticscli"],"label":"Install AnalyticsCLI CLI (npm package @analyticscli/cli@preview)"}]}}
 ---
 
 # AI Product Manager
@@ -39,6 +39,37 @@ Before autopilot runs, these are non-negotiable:
 
 GitHub is optional unless GitHub delivery is enabled.
 `project.githubRepo` and `GITHUB_TOKEN` become hard requirements only when the CLI should auto-create GitHub issues or pull requests.
+
+## AnalyticsCLI CLI Install Protocol
+
+If `analyticscli` is missing, OpenClaw must install it directly from the scoped npm package.
+
+Do not search npm for `analyticscli`.
+Do not search npm for `analyticsscli`.
+Those are binary names or typos, not package names.
+
+Use this exact package:
+
+```bash
+npm install -g @analyticscli/cli@preview
+```
+
+Then verify:
+
+```bash
+command -v analyticscli
+analyticscli --help
+```
+
+If global npm installs are blocked, use the bundled helper from the installed skill root:
+
+```bash
+bash skills/ai-product-manager/scripts/install-analyticscli-cli.sh
+```
+
+The bundled helper automatically falls back from global npm install to a user-local npm prefix at `~/.local/analyticscli-npm` when global install fails with permissions errors.
+
+Only ask the user for help if both direct npm install and the bundled helper fail with a concrete permission or network error.
 
 ## Delivery Modes
 
@@ -85,19 +116,24 @@ Additional connectors:
 
 When the user says `start`, `run`, or `kick off`:
 
-1. Prefer the CLI entrypoint:
+1. First make sure `analyticscli` exists. If not, install it with `npm install -g @analyticscli/cli@preview` or run `bash skills/ai-product-manager/scripts/install-analyticscli-cli.sh`.
+2. Prefer the CLI entrypoint:
    - `openclaw setup --config openclaw.config.json`
-2. Then run:
+3. Then run:
    - `openclaw start --config openclaw.config.json`
-3. In this monorepo, use the workspace dev entrypoint when `openclaw` is not installed globally:
+4. If the standalone `openclaw` CLI is unavailable but this ClawHub skill is installed, bootstrap the bundled runtime once:
+   - `bash skills/ai-product-manager/scripts/bootstrap-openclaw-workspace.sh`
+   - confirm `scripts/openclaw-growth-start.mjs` now exists
+   - `node scripts/openclaw-growth-start.mjs --config data/openclaw-growth-engineer/config.json`
+5. In this monorepo, use the workspace dev entrypoint when `openclaw` is not installed globally:
    - `pnpm --filter @analyticscli/openclaw-cli dev -- start`
-4. Run portable checks first when setup is incomplete:
+6. Run portable checks first when setup is incomplete:
    - `command -v analyticscli`
    - `analyticscli projects list`
    - detect `project.githubRepo` from git remote when possible
    - verify `GITHUB_TOKEN` only if GitHub delivery is enabled
-5. If preflight fails, return only a concrete blocker checklist
-6. If preflight passes, continue with `openclaw run --config openclaw.config.json`
+7. If preflight fails, return only a concrete blocker checklist
+8. If preflight passes, continue with `openclaw run --config openclaw.config.json`
 
 ## Proposal Strategy
 
