@@ -7,7 +7,7 @@ Use this checklist before running autopilot mode.
 | Env var | Purpose | Required | Where to get it |
 | --- | --- | --- | --- |
 | `GITHUB_TOKEN` | GitHub baseline access + issue/PR creation via API | Yes (baseline requirement) | GitHub -> Settings -> Developer settings -> Fine-grained PAT |
-| `ANALYTICSCLI_READONLY_TOKEN` | Read analytics data with CLI commands | Recommended | [dash.analyticscli.com](https://dash.analyticscli.com) -> Project -> API Keys -> `readonly_token` |
+| `ANALYTICSCLI_ACCESS_TOKEN` | Read analytics data with CLI commands | Recommended | [dash.analyticscli.com](https://dash.analyticscli.com) -> API Keys -> access token |
 | `REVENUECAT_API_KEY` | Pull RevenueCat monetization data | Recommended | RevenueCat -> Project -> API Keys (Secret key) |
 | `SENTRY_AUTH_TOKEN` | Pull Sentry issue/event summaries | Recommended | Sentry -> User Settings -> Auth Tokens |
 | `FEEDBACK_API_TOKEN` | Protect optional public feedback endpoint | Optional | Generate locally, e.g. `openssl rand -hex 32` |
@@ -18,8 +18,8 @@ Use this checklist before running autopilot mode.
   - Fine-grained PAT is enough (no full/account-wide token required)
   - Issue mode: Repository `Issues`: Read and Write, `Contents`: Read
   - Pull-request mode: Repository `Pull requests`: Read and Write, `Contents`: Read and Write
-- `ANALYTICSCLI_READONLY_TOKEN`:
-  - Read-only analytics access for selected project
+- `ANALYTICSCLI_ACCESS_TOKEN`:
+  - `read:queries` access for analytics CLI reads and exports
 - `REVENUECAT_API_KEY`:
   - Read-only access where supported
 - `SENTRY_AUTH_TOKEN`:

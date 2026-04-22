@@ -155,8 +155,8 @@ The CLI config should expose `strategy.proposalMode`:
 
 - `GITHUB_TOKEN`
   required only when GitHub issue or pull-request delivery is enabled
-- `ANALYTICSCLI_READONLY_TOKEN`
-  recommended
+- `ANALYTICSCLI_ACCESS_TOKEN`
+  recommended for AnalyticsCLI command/API mode when no local CLI login exists
 - `REVENUECAT_API_KEY`
   recommended for RevenueCat command/API mode
 - `SENTRY_AUTH_TOKEN`

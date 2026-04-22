@@ -124,7 +124,7 @@ You should expect structured PM artifacts such as:
 | Env var | Required when | Where to get it | Minimum scope |
 | --- | --- | --- | --- |
 | `GITHUB_TOKEN` | baseline requirement for this workflow | GitHub -> Settings -> Developer settings -> Fine-grained PAT | Repository Issues: Read/Write, Contents: Read (no full token needed) |
-| `ANALYTICSCLI_READONLY_TOKEN` | analytics source in command mode (or explicit token use) | `dash.analyticscli.com` -> Project -> API Keys -> `readonly_token` | Read-only analytics access |
+| `ANALYTICSCLI_ACCESS_TOKEN` | analytics source in command mode (or explicit token use) | `dash.analyticscli.com` -> API Keys -> access token | `read:queries` |
 | `REVENUECAT_API_KEY` | RevenueCat source refresh | RevenueCat dashboard -> Project -> API Keys -> Secret API key | Read-only where possible |
 | `SENTRY_AUTH_TOKEN` | Sentry source refresh | Sentry -> User Settings -> Auth Tokens | Read-only issue/event scopes |
 | `FEEDBACK_API_TOKEN` | optional public feedback API | generate random secret (`openssl rand -hex 32`) | Token match only |

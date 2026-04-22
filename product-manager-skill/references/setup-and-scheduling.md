@@ -38,7 +38,7 @@ This writes non-secret configuration to:
 Expected environment variable names:
 
 - `GITHUB_TOKEN` (required baseline; fine-grained PAT with `Issues: Read/Write` + `Contents: Read`)
-- `ANALYTICSCLI_READONLY_TOKEN`
+- `ANALYTICSCLI_ACCESS_TOKEN`
 - `REVENUECAT_API_KEY`
 - `SENTRY_AUTH_TOKEN`
 - optional `FEEDBACK_API_TOKEN`
