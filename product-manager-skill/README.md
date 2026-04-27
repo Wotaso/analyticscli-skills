@@ -55,6 +55,7 @@ Important:
 - Missing local repo scripts must not be treated as hard stop; portable mode is required.
 - Missing workspace files under `scripts/` or `data/` must not be treated as blockers in portable mode.
 - Setup should guide the developer with detected status, why each missing value matters, where to get it, and the minimum required permission.
+- Setup must ask which connections the user wants to configure before requesting optional credentials: AnalyticsCLI, GitHub code access, ASC CLI for App Store Connect Analytics data, RevenueCat, Sentry/GlitchTip, Feedback/App Reviews, or skip.
 
 ## Required Tooling And Data Connectors
 
@@ -126,9 +127,10 @@ You should expect structured PM artifacts such as:
 
 | Env var | Required when | Where to get it | Minimum scope |
 | --- | --- | --- | --- |
-| `GITHUB_TOKEN` | strongly recommended for code-aware analysis; required only for GitHub issue/PR creation | GitHub -> Settings -> Developer settings -> Fine-grained PAT | Analysis only: Contents: Read. Issue creation: add Issues: Read/Write. PR creation: add Pull requests: Read/Write + Contents: Read/Write |
+| `GITHUB_TOKEN` | strongly recommended for code-aware analysis; required only for GitHub issue/PR creation | Prefer existing `gh auth login`; token fallback: GitHub -> Settings -> Developer settings -> Fine-grained PAT | Analysis only: Contents: Read + Metadata: Read. Request all repos only for cross-repo analysis. Issue creation: add Issues: Read/Write. PR creation: add Pull requests: Read/Write + Contents: Read/Write |
+| `ASC_KEY_ID` / `ASC_ISSUER_ID` / `ASC_PRIVATE_KEY` | optional App Store Connect Analytics reports only | App Store Connect -> Users and Access -> Integrations -> App Store Connect API, or profile -> Edit Profile -> Individual API Key | Sales/Sales and Reports style access for generated analytics reports; Admin only temporarily for first-time report type requests |
 | `ANALYTICSCLI_ACCESS_TOKEN` | analytics source in command mode (or explicit token use) | `dash.analyticscli.com` -> API Keys -> access token | `read:queries` |
-| `REVENUECAT_API_KEY` | RevenueCat source refresh | RevenueCat dashboard -> Project -> API Keys -> Secret API key | Read-only where possible |
+| `REVENUECAT_API_KEY` | optional RevenueCat monetization/subscription refresh | RevenueCat -> Project Settings -> API Keys -> + New secret API key | Prefer v2 read permissions for charts/metrics and required project configuration resources |
 | `SENTRY_AUTH_TOKEN` | Sentry source refresh | Sentry -> User Settings -> Auth Tokens | Read-only issue/event scopes |
 | `FEEDBACK_API_TOKEN` | optional public feedback API | generate random secret (`openssl rand -hex 32`) | Token match only |
 

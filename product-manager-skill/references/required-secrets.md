@@ -6,9 +6,10 @@ Use this checklist before running autopilot mode.
 
 | Env var | Purpose | Required | Where to get it |
 | --- | --- | --- | --- |
-| `GITHUB_TOKEN` | GitHub repo/code access for analysis; optional issue/PR creation via API | Strongly recommended for code-aware analysis; required only for GitHub issue/PR creation | GitHub -> Settings -> Developer settings -> Fine-grained PAT |
+| `GITHUB_TOKEN` | GitHub repo/code access for analysis; optional issue/PR creation via API | Strongly recommended for code-aware analysis; required only for GitHub issue/PR creation | Prefer `gh auth login` when available. Token fallback: GitHub -> Settings -> Developer settings -> Fine-grained PAT |
 | `ANALYTICSCLI_ACCESS_TOKEN` | Read analytics data with CLI commands | Recommended | [dash.analyticscli.com](https://dash.analyticscli.com) -> API Keys -> access token |
-| `REVENUECAT_API_KEY` | Pull RevenueCat monetization data | Recommended | RevenueCat -> Project -> API Keys (Secret key) |
+| `ASC_KEY_ID` / `ASC_ISSUER_ID` / `ASC_PRIVATE_KEY` | Pull App Store Connect Analytics reports through `asc` CLI | Optional, ask before setup | App Store Connect -> Users and Access -> Integrations -> App Store Connect API, or profile -> Edit Profile -> Individual API Key |
+| `REVENUECAT_API_KEY` | Pull RevenueCat monetization/subscription data | Optional, ask before setup | RevenueCat -> Project Settings -> API Keys -> + New secret API key |
 | `SENTRY_AUTH_TOKEN` | Pull Sentry issue/event summaries | Recommended | Sentry -> User Settings -> Auth Tokens |
 | `FEEDBACK_API_TOKEN` | Protect optional public feedback endpoint | Optional | Generate locally, e.g. `openssl rand -hex 32` |
 
@@ -16,13 +17,18 @@ Use this checklist before running autopilot mode.
 
 - `GITHUB_TOKEN`:
   - Fine-grained PAT is enough (no full/account-wide token required)
-  - Analysis only: repository access to the target repo with `Contents`: Read
+  - Prefer reusing an existing GitHub CLI login via `gh auth status`; if a token is needed, use fine-grained read-only access
+  - Analysis only: repository access with `Contents`: Read and `Metadata`: Read; request all repositories only for cross-repo code analysis
   - Issue creation: add repository `Issues`: Read and Write only when issue delivery is enabled
   - Pull-request creation: add repository `Pull requests`: Read and Write and `Contents`: Read and Write only when draft PR delivery is enabled
+- `ASC_*`:
+  - Analytics data only; do not request release, TestFlight, pricing, user-management, or write/admin permissions for this connector
+  - Prefer Sales/Sales and Reports style access for generated analytics reports; Finance is broader; Admin should only be temporary when a new analytics report type must be requested first
 - `ANALYTICSCLI_ACCESS_TOKEN`:
   - `read:queries` access for analytics CLI reads and exports
 - `REVENUECAT_API_KEY`:
-  - Read-only access where supported
+  - Use a server-side secret key, never a client SDK key
+  - Prefer RevenueCat v2 read permissions for charts/metrics and required project configuration resources; add customer/subscriber read only when needed by the selected summary
 - `SENTRY_AUTH_TOKEN`:
   - Read scopes for issues/events/projects in the target org/project
 
