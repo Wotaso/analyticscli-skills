@@ -54,6 +54,7 @@ Important:
 - In `start/run` mode, missing prerequisites should be returned as a blocker checklist (config/API keys/access), not as a request for manual analytics summaries.
 - Missing local repo scripts must not be treated as hard stop; portable mode is required.
 - Missing workspace files under `scripts/` or `data/` must not be treated as blockers in portable mode.
+- Setup should guide the developer with detected status, why each missing value matters, where to get it, and the minimum required permission.
 
 ## Required Tooling And Data Connectors
 

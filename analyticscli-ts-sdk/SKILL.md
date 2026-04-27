@@ -3,7 +3,7 @@ name: analyticscli-ts-sdk
 description: Use when integrating or upgrading the AnalyticsCLI TypeScript SDK in web, TypeScript, React Native, or Expo apps.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.6.8","analyticscli-target":"@analyticscli/sdk","analyticscli-supported-range":">=0.1.0-preview.6 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/analyticscli-skills"}}
+metadata: {"author":"wotaso","version":"1.6.9","analyticscli-target":"@analyticscli/sdk","analyticscli-supported-range":">=0.1.0-preview.6 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/analyticscli-skills"}}
 ---
 
 # AnalyticsCLI TypeScript SDK
@@ -17,7 +17,7 @@ metadata: {"author":"wotaso","version":"1.6.8","analyticscli-target":"@analytics
 
 ## Supported Versions
 
-- Skill pack: `1.6.8`
+- Skill pack: `1.6.9`
 - Target package: `@analyticscli/sdk`
 - Supported range: `>=0.1.0-preview.6 <0.2.0`
 - If a future SDK major changes APIs or event contracts in incompatible ways, add a sibling skill such as `analyticscli-ts-sdk-v1`
@@ -78,6 +78,19 @@ See [Versioning Notes](references/versioning.md).
 - To avoid repetitive payloads, create one onboarding tracker with shared flow defaults and use `step(...).surveyResponse(...)` with only survey-specific fields at call sites.
 - For React Native / Expo non-onboarding screens, track screen views on focus with `useFocusEffect(...)` and `analytics.screen(...)`.
 - For RevenueCat correlation in host apps, keep AnalyticsCLI user identity in sync with the same stable user id used in `Purchases.logIn(...)` (`setUser` on sign-in/session restore, `clearUser` on sign-out).
+
+## Developer Setup DX
+
+When helping a developer set up the SDK, make the flow guided and verifiable.
+
+- First detect the framework, package manager, app entrypoint, env naming convention, and existing analytics providers.
+- Explain the minimal setup path before editing: install/upgrade SDK, add publishable API key env, initialize once, instrument core funnels, verify ingestion.
+- Ask only for the missing dashboard value that cannot be inferred. For SDK setup this is normally the publishable ingest API key; CLI verification can also use a readonly token.
+- Tell the developer where to find each value in the dashboard and what it is used for.
+- Prefer direct repo edits and package installs when the environment allows it; do not hand back generic setup instructions when you can implement them.
+- Keep host-app snippets small and idiomatic for the detected framework.
+- End setup with a concrete verification path: app event to trigger, CLI/dashboard check to run, and the expected event names.
+- If this SDK setup is part of AI Growth Engineer onboarding, explain that high-quality instrumentation plus connected GitHub code access lets analytics findings map back to actionable implementation areas.
 
 ## Feedback Collection Rules
 
