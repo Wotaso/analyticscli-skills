@@ -67,7 +67,7 @@ If global npm installs are blocked, use the bundled helper from the installed sk
 bash skills/ai-product-manager/scripts/install-analyticscli-cli.sh
 ```
 
-The bundled helper automatically falls back from global npm install to a user-local npm prefix at `~/.local/analyticscli-npm` when global install fails with permissions errors.
+The bundled helper automatically falls back from global npm install to a user-local npm prefix at `~/.local` when global install fails with permissions errors.
 
 Only ask the user for help if both direct npm install and the bundled helper fail with a concrete permission or network error.
 

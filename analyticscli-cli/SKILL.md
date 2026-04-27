@@ -3,7 +3,7 @@ name: analyticscli-cli
 description: Use AnalyticsCLI CLI as the deterministic, bounded interface for analytics queries, exports, and SDK validation in coding-agent workflows.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.0.0","analyticscli-target":"@analyticscli/cli","analyticscli-supported-range":"^0.1.0","openclaw":{"emoji":"📈","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["analyticscli"]},"install":[{"id":"npm","kind":"node","package":"@analyticscli/cli","bins":["analyticscli"],"label":"Install AnalyticsCLI CLI (npm)"}]}}
+metadata: {"author":"wotaso","version":"1.0.1","analyticscli-target":"@analyticscli/cli","analyticscli-supported-range":">=0.1.2-preview.0 <0.2.0","openclaw":{"emoji":"📈","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["analyticscli"]},"install":[{"id":"npm","kind":"node","package":"@analyticscli/cli@preview","bins":["analyticscli"],"label":"Install/update AnalyticsCLI CLI (npm package @analyticscli/cli@preview)"}]}}
 ---
 
 # AnalyticsCLI CLI
@@ -17,9 +17,9 @@ metadata: {"author":"wotaso","version":"1.0.0","analyticscli-target":"@analytics
 
 ## Supported Versions
 
-- Skill pack: `1.0.0`
-- Target package: `@analyticscli/cli`
-- Supported range: `^0.1.0`
+- Skill pack: `1.0.1`
+- Target package: `@analyticscli/cli@preview`
+- Supported range: `>=0.1.2-preview.0 <0.2.0`
 - If a future CLI major changes commands or flags in incompatible ways, split to a sibling skill such as `analyticscli-cli-v1`
 
 See [Versioning Notes](references/versioning.md).
@@ -91,6 +91,8 @@ Before running setup, collect required values from your dashboard:
 Preferred:
 
 ```bash
+npm install -g @analyticscli/cli@preview
+command -v analyticscli
 npx -y @analyticscli/cli@preview setup
 # Paste readonly token only when prompted; do not pass token as a command argument.
 ```
@@ -100,6 +102,25 @@ Alternatives:
 ```bash
 analyticscli login
 # Choose readonly-token interactively; do not put tokens in command args.
+```
+
+If `analyticscli: command not found`, install or update the npm package. The package name is
+`@analyticscli/cli`; the binary name is `analyticscli`.
+
+Do not search npm for `analyticscli` or `analyticsscli`.
+
+```bash
+npm install -g @analyticscli/cli@preview
+analyticscli --help
+```
+
+On VPS hosts where global npm installs are blocked, use a user-local prefix:
+
+```bash
+mkdir -p "$HOME/.local"
+npm install -g --prefix "$HOME/.local" @analyticscli/cli@preview
+export PATH="$HOME/.local/bin:$PATH"
+analyticscli --help
 ```
 
 ## Output Mode
