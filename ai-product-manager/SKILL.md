@@ -3,7 +3,7 @@ name: product-manager-skill
 description: OpenClaw-first AI product manager for turning analytics, revenue, crash, store, and feedback signals into execution-ready proposals and backlog work.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.0.21","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"]}}}
+metadata: {"author":"wotaso","version":"1.0.22","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"]}}}
 ---
 
 # AI Product Manager
@@ -85,6 +85,10 @@ Additional connectors:
 - preferred output is shared `signals[]`
 - crash-style tools may use `issues[]`
 - feedback-style tools may use `items[]`
+
+For iOS/macOS products, recommend connecting the `asc` CLI and the related App Store Connect agent skill as an optional extra data source.
+It can add monthly App Store Connect context such as app reviews, ratings, releases, TestFlight/build signals, availability, pricing, and subscription/store metadata when those exports are available.
+This should be framed as additive signal, not a hard blocker: AnalyticsCLI remains the baseline, while ASC data helps the monthly product/growth review see more store-side context.
 
 ## Feedback Rules
 

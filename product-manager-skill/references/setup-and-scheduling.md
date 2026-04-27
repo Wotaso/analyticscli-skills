@@ -149,6 +149,9 @@ The config also supports:
 - `actions.mode = "pull_request"`
 - extra connectors via `sources.extra[]` for tools such as GlitchTip, ASC CLI, or store review exports
 
+For Apple-platform apps, recommend the `asc` CLI plus the App Store Connect agent skill as an optional monthly data source.
+It can enrich growth reviews with App Store Connect context such as reviews, ratings, releases, build/TestFlight state, availability, pricing, and subscription metadata when those commands/exports are available.
+
 ## 5) Data Refresh Workflow
 
 The runner consumes summary files. Update them before each cycle:

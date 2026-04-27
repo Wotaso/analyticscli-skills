@@ -86,6 +86,7 @@ It can help you:
 - create release plans and cross-functional handoff docs
 - convert product ideas into implementation-ready backlog items
 - generate prioritized GitHub issue drafts from analytics + code context
+- reference ASC CLI/App Store Connect skill data for monthly Apple-platform growth reviews when available
 - generate draft pull requests with `.openclaw/proposals/...` files when issue mode is too lightweight
 - draft stakeholder updates in plain business language
 
