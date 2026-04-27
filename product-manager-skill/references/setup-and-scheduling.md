@@ -37,7 +37,7 @@ This writes non-secret configuration to:
 
 Expected environment variable names:
 
-- `GITHUB_TOKEN` (required baseline; fine-grained PAT with `Issues: Read/Write` + `Contents: Read`)
+- `GITHUB_TOKEN` (strongly recommended with `Contents: Read` for code-aware analysis; add issue/PR write scopes only when GitHub creation is enabled)
 - `ANALYTICSCLI_ACCESS_TOKEN`
 - `REVENUECAT_API_KEY`
 - `SENTRY_AUTH_TOKEN`
@@ -132,7 +132,7 @@ The check validates:
 - required binaries (`analyticscli`, `python3`)
 - required skill availability (`analyticscli-cli`)
 - optional chart dependency (`matplotlib`)
-- required env vars for baseline execution (`GITHUB_TOKEN`) and enabled channels
+- recommended env vars for code-aware analysis (`GITHUB_TOKEN`) and required env vars for enabled delivery channels
 - live connector/API smoke tests for enabled channels
 
 The config also supports:
@@ -183,7 +183,9 @@ node scripts/openclaw-growth-engineer.mjs \
 
 ## 8) GitHub Creation Modes
 
-Use a fine-grained `GITHUB_TOKEN` (no full-account token needed):
+Use a fine-grained `GITHUB_TOKEN` (no full-account token needed).
+For analysis-only runs, readable repo/code access is enough.
+Add issue or pull-request write scopes only when the command should create GitHub artifacts:
 
 ```bash
 node scripts/openclaw-growth-engineer.mjs \

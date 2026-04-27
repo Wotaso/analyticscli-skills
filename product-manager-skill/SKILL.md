@@ -3,7 +3,7 @@ name: product-manager-skill
 description: OpenClaw-first AI product manager for turning analytics, revenue, crash, store, and feedback signals into execution-ready proposals and backlog work.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.0.19","analyticscli-target":"@analyticscli/cli","analyticscli-supported-range":">=0.1.2-preview.0 <0.2.0","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"]},"install":[{"id":"analyticscli-cli","kind":"node","package":"@analyticscli/cli@preview","bins":["analyticscli"],"label":"Install/update AnalyticsCLI CLI (npm package @analyticscli/cli@preview)"}]}}
+metadata: {"author":"wotaso","version":"1.0.20","analyticscli-target":"@analyticscli/cli","analyticscli-supported-range":">=0.1.2-preview.0 <0.2.0","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"]},"install":[{"id":"analyticscli-cli","kind":"node","package":"@analyticscli/cli@preview","bins":["analyticscli"],"label":"Install/update AnalyticsCLI CLI (npm package @analyticscli/cli@preview)"}]}}
 ---
 
 # AI Product Manager
@@ -37,8 +37,15 @@ Before autopilot runs, these are non-negotiable:
 - a writable `openclaw.config.json`
 - `sources.analytics` enabled
 
-GitHub is optional unless GitHub delivery is enabled.
-`project.githubRepo` and `GITHUB_TOKEN` become hard requirements only when the CLI should auto-create GitHub issues or pull requests.
+GitHub connection is strongly recommended for serious analysis, even when GitHub delivery is disabled.
+Treat readable GitHub repo access as very important because analytics signals become much more actionable when OpenClaw can map funnels, events, crashes, revenue signals, and feedback back to actual code areas.
+Without repo context, findings stay generic and file/module hypotheses are lower confidence.
+
+Use the least privilege GitHub access that matches the requested workflow:
+
+- code analysis only: readable repo/code access is enough
+- issue creation: add issue write permission only when GitHub issue delivery is enabled
+- pull-request creation: add pull-request and contents write permission only when draft PR delivery is enabled
 
 ## Dependency Refresh Protocol
 
@@ -189,7 +196,8 @@ When the user says `start`, `run`, or `kick off`:
    - `command -v analyticscli`
    - `analyticscli projects list`
    - detect `project.githubRepo` from git remote when possible
-   - verify `GITHUB_TOKEN` only if GitHub delivery is enabled
+   - verify readable GitHub repo access when available so analytics findings can be mapped to code
+   - verify GitHub issue/PR write scopes only if GitHub delivery is enabled
 7. If preflight fails, return only a concrete blocker checklist
 8. If preflight passes, continue with `openclaw run --config openclaw.config.json`
 
@@ -212,7 +220,8 @@ The CLI config should expose `strategy.proposalMode`:
 ## Required Secrets
 
 - `GITHUB_TOKEN`
-  required only when GitHub issue or pull-request delivery is enabled
+  strongly recommended with readable repo/code access for code-aware analysis
+  required with write scopes only when GitHub issue or pull-request delivery is enabled
 - `ANALYTICSCLI_ACCESS_TOKEN`
   recommended for AnalyticsCLI command/API mode when no local CLI login exists
 - `REVENUECAT_API_KEY`

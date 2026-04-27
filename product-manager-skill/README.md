@@ -12,7 +12,8 @@ It also supports a growth-autopilot workflow that can generate and optionally cr
 - `node` + `npx` installed.
 - For analytics source preparation: `analyticscli` CLI.
 - `analyticscli-cli` skill installed/fetched.
-- GitHub repo configured + `GITHUB_TOKEN` available (least privilege).
+- GitHub connected with readable repo/code access whenever possible; this is very important for mapping analytics data to actionable code areas.
+- Optional GitHub issue/PR write permissions only when the workflow should create issues or draft pull requests.
 - For charting: `python3` + `matplotlib`.
 
 ### 2) Install
@@ -42,7 +43,7 @@ When user says "start/run the skill", the agent should not ask generic intake qu
 It should execute:
 
 1. Run portable startup checks first-class:
-   - validate `analyticscli` + auth + `GITHUB_TOKEN` + repo detection
+   - validate `analyticscli` + auth + readable GitHub repo access when available
    - run bounded `analyticscli` queries
    - generate prioritized issue drafts by default
    - create GitHub issues only when `actions.autoCreateIssues=true` is explicitly configured
@@ -123,7 +124,7 @@ You should expect structured PM artifacts such as:
 
 | Env var | Required when | Where to get it | Minimum scope |
 | --- | --- | --- | --- |
-| `GITHUB_TOKEN` | baseline requirement for this workflow | GitHub -> Settings -> Developer settings -> Fine-grained PAT | Repository Issues: Read/Write, Contents: Read (no full token needed) |
+| `GITHUB_TOKEN` | strongly recommended for code-aware analysis; required only for GitHub issue/PR creation | GitHub -> Settings -> Developer settings -> Fine-grained PAT | Analysis only: Contents: Read. Issue creation: add Issues: Read/Write. PR creation: add Pull requests: Read/Write + Contents: Read/Write |
 | `ANALYTICSCLI_ACCESS_TOKEN` | analytics source in command mode (or explicit token use) | `dash.analyticscli.com` -> API Keys -> access token | `read:queries` |
 | `REVENUECAT_API_KEY` | RevenueCat source refresh | RevenueCat dashboard -> Project -> API Keys -> Secret API key | Read-only where possible |
 | `SENTRY_AUTH_TOKEN` | Sentry source refresh | Sentry -> User Settings -> Auth Tokens | Read-only issue/event scopes |
