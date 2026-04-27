@@ -3,7 +3,7 @@ name: product-manager-skill
 description: OpenClaw-first AI product manager for turning analytics, revenue, crash, store, and feedback signals into execution-ready proposals and backlog work.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.0.24","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"]}}}
+metadata: {"author":"wotaso","version":"1.0.25","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"]}}}
 ---
 
 # AI Product Manager
@@ -27,6 +27,13 @@ Prefer the standalone `openclaw` CLI as the runtime surface.
 The CLI is intentionally non-AI. OpenClaw should stay the only conversational and implementation layer.
 Use the CLI to gather signals, generate proposals, schedule checks, and send deliveries.
 If the user later asks OpenClaw to implement a proposal, OpenClaw should inspect the generated drafts and then use OpenClaw itself to do the work.
+
+## Customization Boundary
+
+Treat this installed skill as vendor-managed and replaceable.
+OpenClaw should almost never edit this skill in-place for user- or project-specific customization, because future ClawHub updates may overwrite local changes.
+When the user wants custom behavior, create a separate companion skill or project-local customization skill instead, for example `openclaw-growth-custom`, and have that skill reference or layer on top of this one.
+Only modify this skill directly when the change is intended as an upstream reusable fix for the canonical skill repository.
 
 ## Setup DX Rules
 
