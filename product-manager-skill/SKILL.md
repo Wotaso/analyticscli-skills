@@ -3,7 +3,7 @@ name: product-manager-skill
 description: OpenClaw-first AI product manager for turning analytics, revenue, crash, store, and feedback signals into execution-ready proposals and backlog work.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.0.39","analyticscli-target":"@analyticscli/cli","analyticscli-supported-range":">=0.1.2-preview.0 <0.2.0","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"]},"install":[{"id":"analyticscli-cli","kind":"node","package":"@analyticscli/cli@preview","bins":["analyticscli"],"label":"Install/update AnalyticsCLI CLI (npm package @analyticscli/cli@preview)"}]}}
+metadata: {"author":"wotaso","version":"1.0.40","analyticscli-target":"@analyticscli/cli","analyticscli-supported-range":">=0.1.2-preview.0 <0.2.0","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"]},"install":[{"id":"analyticscli-cli","kind":"node","package":"@analyticscli/cli@preview","bins":["analyticscli"],"label":"Install/update AnalyticsCLI CLI (npm package @analyticscli/cli@preview)"}]}}
 ---
 
 # AI Product Manager
@@ -159,8 +159,9 @@ GitHub setup:
 2. This installs/verifies the GitHub helper skill and `gh` CLI when possible.
 3. Detect repo locally: git rev-parse --show-toplevel and git remote get-url origin
 4. Check auth: gh auth status; if missing, run gh auth login.
-5. For code analysis only, read-only repo access is enough. If a token is needed, create one at https://github.com/settings/personal-access-tokens/new with Contents: Read and Metadata: Read for the selected repos.
-6. Only add Issues write or Pull requests/Contents write if the user wants OpenClaw to create issues or draft PRs.
+5. If `gh` is missing or cannot be installed, the wizard should immediately prompt for a fine-grained `GITHUB_TOKEN` fallback in the host terminal.
+6. For code analysis only, read-only repo access is enough. If a token is needed, create one at https://github.com/settings/personal-access-tokens/new with Contents: Read and Metadata: Read for the selected repos.
+7. Only add Issues write or Pull requests/Contents write if the user wants OpenClaw to create issues or draft PRs.
 ```
 
 Direct connector URLs to show the user when relevant:
