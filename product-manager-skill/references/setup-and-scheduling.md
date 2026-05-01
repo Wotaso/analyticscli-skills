@@ -36,6 +36,14 @@ The setup flow should optimize for developer experience:
 - hand off weak or missing app instrumentation to the `analyticscli-ts-sdk` skill with concrete SDK setup steps
 - ask exactly which optional connections the user wants to set up before requesting credentials: AnalyticsCLI, GitHub code access, ASC CLI for App Store Connect Analytics data, RevenueCat, Sentry/GlitchTip, Feedback/App Reviews, or skip
 
+For GitHub, RevenueCat, and App Store Connect connector setup, use the connector wizard instead of asking the user to compose setup commands manually:
+
+```bash
+node scripts/openclaw-growth-wizard.mjs --connectors github,revenuecat,asc
+```
+
+The connector wizard asks only for the selected connectors, explains each provider step in the terminal, writes local secrets to `~/.config/openclaw-growth/secrets.env`, and runs helper setup for the selected connectors.
+
 ## 3) Store Secrets Securely
 
 ### OpenClaw Secret Storage (Preferred)
