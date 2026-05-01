@@ -3,7 +3,7 @@ name: product-manager-skill
 description: OpenClaw-first AI product manager for turning analytics, revenue, crash, store, and feedback signals into execution-ready proposals and backlog work.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.0.40","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"]}}}
+metadata: {"author":"wotaso","version":"1.0.41","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"]}}}
 ---
 
 # AI Product Manager
@@ -125,7 +125,7 @@ bash skills/ai-product-manager/scripts/bootstrap-openclaw-workspace.sh
 node scripts/openclaw-growth-wizard.mjs --connectors revenuecat,asc,github
 ```
 
-Use only the connectors the user accepted. The wizard explains the selected provider steps, asks for local-terminal input/multiple choice selections, saves host-local secrets, enables the selected connector stubs in config, and runs helper setup for GitHub helper skill + `gh`, ASC skill pack + `asc`, and RevenueCat MCP transport/config.
+Use only the connectors the user accepted. If no connector list is passed, the wizard shows a terminal checkbox picker with all available connectors; use Up/Down, Space, A, and Enter. The wizard explains the selected provider steps, asks for local-terminal input/multiple choice selections, saves host-local secrets, enables the selected connector stubs in config, and runs helper setup for GitHub helper skill + `gh`, ASC skill pack + `asc`, and RevenueCat MCP transport/config.
 Do not use bare `openclaw setup --config ...` on OpenClaw hosts unless you have verified it is the AI Product Manager CLI; on many hosts `openclaw` is the core OpenClaw CLI and will reject `--config`.
 In the Agentic Analytics monorepo only, use `pnpm --filter @analyticscli/openclaw-cli dev setup --repo-root <repo-root> --skip-shared-skills --connectors <list>`.
 If helper installation fails, report the failed helper and exact next install command, then continue with the other selected connectors.
