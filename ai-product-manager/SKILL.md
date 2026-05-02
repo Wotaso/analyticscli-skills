@@ -3,7 +3,7 @@ name: product-manager-skill
 description: OpenClaw-first AI product manager for turning analytics, revenue, crash, store, and feedback signals into execution-ready proposals and backlog work.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.0.52","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"]}}}
+metadata: {"author":"wotaso","version":"1.0.53","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"]}}}
 ---
 
 # AI Product Manager
@@ -39,6 +39,7 @@ Only modify this skill directly when the change is intended as an upstream reusa
 
 Setup should feel guided for a developer, not like a silent preflight dump.
 
+- Root-cause policy: when connector setup fails for a user, do not hand out VPS-specific workaround commands as the final answer. Fix the reusable AI Growth Engineer skill/CLI/wizard so every future installer gets the corrected flow, then publish/sync the skill and ask the running OpenClaw instance to refetch it.
 - Prefer auto-detection and direct fixes over asking the user to run generic commands.
 - In chat, explain only what the user needs for the next step. Put provider details, scopes, and secret prompts in the wizard unless the user asks.
 - Ask for the minimum missing value only; do not request issue/PR permissions unless artifact creation is enabled.
@@ -67,6 +68,7 @@ Answer only with this shape:
 
 ```text
 AI Growth Engineer connectors:
+- AnalyticsCLI product analytics
 - GitHub code access
 - RevenueCat monetization data
 - App Store Connect CLI
@@ -89,6 +91,7 @@ If the user asks a broad question such as "how do I setup everything", answer wi
 
 ```text
 Available connectors:
+- AnalyticsCLI product analytics
 - GitHub code access
 - RevenueCat monetization data
 - App Store Connect CLI
@@ -111,7 +114,7 @@ If the user already names specific connectors, still prefer the checkbox wizard 
 ```bash
 cd /home/lo/.openclaw/workspace && \
   bash skills/ai-product-manager/scripts/bootstrap-openclaw-workspace.sh && \
-  node scripts/openclaw-growth-wizard.mjs --connectors github,revenuecat,asc
+  node scripts/openclaw-growth-wizard.mjs --connectors analytics,github,revenuecat,asc
 ```
 
 Use only the connectors the user accepted. The wizard owns provider-specific instructions, local-terminal secret prompts, helper setup, and smoke tests. Chat should only summarize results after the wizard finishes or when the user asks.
