@@ -3,7 +3,7 @@ name: product-manager-skill
 description: OpenClaw-first AI product manager for turning analytics, revenue, crash, store, and feedback signals into execution-ready proposals and backlog work.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.0.45","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"]}}}
+metadata: {"author":"wotaso","version":"1.0.46","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"]}}}
 ---
 
 # AI Product Manager
@@ -115,7 +115,7 @@ cd /home/lo/.openclaw/workspace && \
 ```
 
 Use only the connectors the user accepted. The wizard owns provider-specific instructions, local-terminal secret prompts, helper setup, and smoke tests. Chat should only summarize results after the wizard finishes or when the user asks.
-For GitHub, the wizard must try to install `gh` automatically into `~/.local/bin` when it is missing. It must start GitHub.com login with `gh auth login --hostname github.com --git-protocol https --web`, so the user is not asked which GitHub host to use. Do not ask for token fallback if `gh auth status --hostname github.com` succeeds.
+For GitHub, the wizard must let the user choose `read-only` or `read-write` permissions before asking for credentials. Prefer fine-grained `GITHUB_TOKEN` setup so the user controls repository access and scopes. Read-only requires only Metadata: Read and Contents: Read. Read/write adds Issues, Pull requests, Contents write, or Workflow only when the user wants those capabilities. Tell the user they can rerun the wizard later to change GitHub permissions.
 
 Do not ask for `ASC_APP_ID` during initial setup. After ASC auth works, list/infer apps. If the target is ambiguous, ask for the app name first; only ask for a numeric app id if app-name resolution fails.
 
@@ -178,35 +178,21 @@ openclaw skills install steipete/github
 npx clawhub@latest install github
 ```
 
-Start the GitHub CLI setup flow yourself:
+GitHub setup must go through the connector wizard's permission-mode step, not a raw `gh auth login` flow. The wizard should:
 
-1. Run `git rev-parse --show-toplevel` to detect the local repo root.
-2. Run `git remote get-url origin` and infer `owner/repo` when possible.
-3. Run `gh auth status`.
-4. If `gh` is not authenticated, start `gh auth login` and tell the user to complete the browser/device flow.
-5. After auth succeeds, use local repo context for read-only code analysis immediately.
-6. Ask for issue or pull-request write permissions only if GitHub delivery is enabled.
+1. Detect repo root/remote when useful.
+2. Ask the user to choose `read-only` or `read-write`.
+3. Explain the minimum fine-grained token permissions for that chosen mode only.
+4. Store `GITHUB_TOKEN` locally when the user pastes it into the terminal wizard.
+5. Install `gh` locally only as a helper binary; do not use GitHub CLI OAuth as the default credential path because it can request broad repository/workflow permissions.
+6. Tell the user they can rerun the wizard later to change GitHub permissions.
 
-If GitHub auth is missing, do not stop at "GitHub is blocked" or "no GitHub auth configured".
-Either start the login flow directly with `gh auth login`, or, if the runtime cannot run interactive auth, print the exact next steps:
+Use least privilege:
 
-```text
-GitHub is not connected yet.
-1. Run: gh auth login
-2. Choose GitHub.com.
-3. Prefer HTTPS unless the repo already uses SSH.
-4. For code analysis only, read-only repo access is enough.
-5. If issue creation is desired, add Issues read/write.
-6. If draft PR creation is desired, add Pull requests read/write and Contents read/write.
-7. Verify with: gh auth status
-```
-
-Use the least privilege GitHub access that matches the requested workflow:
-
-- code analysis only: readable repo/code access is enough; prefer `gh auth status` / `gh auth login` when an existing GitHub CLI login can be reused
-- if the user must create a token, prefer a fine-grained read-only token with `Contents: Read` and `Metadata: Read`, and ask for access to all repositories only when the user wants cross-repo code analysis
-- issue creation: add issue write permission only when GitHub issue delivery is enabled
-- pull-request creation: add pull-request and contents write permission only when draft PR delivery is enabled
+- read-only code analysis: Metadata: Read and Contents: Read only
+- issue creation: add Issues: Read/Write only when GitHub issue delivery is enabled
+- draft PR creation: add Pull requests: Read/Write and Contents: Read/Write only when draft PR delivery is enabled
+- workflow permission: request only when the user explicitly wants OpenClaw to edit GitHub Actions workflow files
 
 ## Delivery Modes
 
