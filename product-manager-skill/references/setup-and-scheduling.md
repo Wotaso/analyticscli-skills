@@ -1,33 +1,41 @@
-# Setup And Scheduling (OpenClaw + VPS)
+# Setup And Scheduling
 
-This is the recommended production-safe baseline for running growth autopilot on a VPS with OpenClaw.
+This is the recommended OpenClaw-first baseline.
 
-## 1) Install Dependencies
-
-```bash
-npx -y @analyticscli/cli@preview --help
-python3 -m pip install matplotlib
-```
-
-If SDK instrumentation is part of the target app, install in that app repository:
+## 1) Install Runtime
 
 ```bash
-npm i @analyticscli/sdk@preview
+npx -y clawhub install ai-product-manager
+bash skills/ai-product-manager/scripts/bootstrap-openclaw-workspace.sh
 ```
 
-## 2) Generate Non-Secret Config
+The runtime must also ensure the AnalyticsCLI npm package is present. The package name is
+`@analyticscli/cli`; the binary name is `analyticscli`.
 
-Run:
+```bash
+npm install -g @analyticscli/cli@preview
+```
+
+If global npm installs fail on a VPS, use:
+
+```bash
+bash skills/openclaw-growth-engineer/scripts/install-analyticscli-cli.sh
+```
+
+`openclaw setup`, `openclaw start`, and the copied preflight/start runtime should run this
+install/update automatically before using `analyticscli`.
+
+## 2) Generate Config
 
 ```bash
 node scripts/openclaw-growth-wizard.mjs
 ```
 
-This writes non-secret configuration to:
+The config is non-secret and commit-safe:
 
 - `data/openclaw-growth-engineer/config.json`
 
-The setup flow should optimize for developer experience:
+The setup flow should be developer-friendly:
 
 - auto-detect repo root, package manager, git remote, and available AnalyticsCLI auth when possible
 - explain why each requested connection is needed before asking for it
@@ -36,128 +44,59 @@ The setup flow should optimize for developer experience:
 - hand off weak or missing app instrumentation to the `analyticscli-ts-sdk` skill with concrete SDK setup steps
 - ask exactly which optional connections the user wants to set up before requesting credentials: AnalyticsCLI, GitHub code access, ASC CLI for App Store Connect Analytics data, RevenueCat, Sentry/GlitchTip, Feedback/App Reviews, or skip
 
-For GitHub, RevenueCat, and App Store Connect connector setup, use the connector wizard instead of asking the user to compose setup commands manually:
+For GitHub, RevenueCat, Sentry, and App Store Connect connector setup, use the connector wizard instead of asking the user to compose setup commands manually:
 
 ```bash
-node scripts/openclaw-growth-wizard.mjs --connectors github,revenuecat,asc
+node scripts/openclaw-growth-wizard.mjs --connectors github,revenuecat,sentry,asc
 ```
 
 The connector wizard asks only for the selected connectors, explains each provider step in the terminal, writes local secrets to `~/.config/openclaw-growth/secrets.env`, and runs helper setup for the selected connectors.
 
-## 3) Store Secrets Securely
+## 3) Choose GitHub Code Access And Delivery Mode
 
-### OpenClaw Secret Storage (Preferred)
+Connect GitHub with readable repo/code access whenever possible.
+This is very important for turning analytics signals into concrete file/module hypotheses.
+Issue and pull-request write permissions are optional; request them only when the selected delivery mode should create GitHub artifacts.
 
-- Save all tokens in OpenClaw secret storage.
-- Inject them into runtime environment variables.
-- Keep config files and prompts secret-free.
-
-Expected environment variable names:
-
-- `GITHUB_TOKEN` (prefer GitHub CLI auth; token fallback should be fine-grained read-only with `Contents: Read` + `Metadata: Read` for code-aware analysis; add issue/PR write scopes only when GitHub creation is enabled)
-- `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_PRIVATE_KEY` or `ASC_PRIVATE_KEY_PATH` (optional App Store Connect Analytics data only)
-- `ANALYTICSCLI_ACCESS_TOKEN`
-- `REVENUECAT_API_KEY`
-- `SENTRY_AUTH_TOKEN`
-- optional `FEEDBACK_API_TOKEN`
-
-### VPS Fallback Baseline (When Running Via systemd)
-
-1. Create a root-owned directory and env file outside your repository:
-   - `/etc/openclaw-growth/`
-   - `/etc/openclaw-growth/env`
-2. Set strict permissions:
-   - directory `0700`
-   - env file `0600`
-3. Run services as a dedicated non-root user.
-4. Load secrets only through `EnvironmentFile`.
-
-One-time setup commands:
+Prefer GitHub CLI:
 
 ```bash
-sudo install -d -m 700 -o root -g root /etc/openclaw-growth
-sudo install -m 600 -o root -g root /dev/null /etc/openclaw-growth/env
-sudoedit /etc/openclaw-growth/env
+gh auth status
+gh auth login
+gh repo view --json nameWithOwner,defaultBranchRef
 ```
 
-Verification:
+For analysis-only token fallback, ask for a fine-grained read-only token with `Contents: Read` and `Metadata: Read`.
+Ask for all repositories only when the user wants cross-repo code analysis.
 
-```bash
-sudo ls -l /etc/openclaw-growth/env
-```
-
-Example `systemd` unit:
-
-```ini
-[Unit]
-Description=OpenClaw Growth Runner
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Type=simple
-User=openclaw
-WorkingDirectory=/opt/agentic-analytics
-EnvironmentFile=/etc/openclaw-growth/env
-ExecStart=/usr/bin/node scripts/openclaw-growth-runner.mjs --config data/openclaw-growth-engineer/config.json --loop
-Restart=always
-RestartSec=20
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=strict
-ProtectHome=true
-ReadWritePaths=/opt/agentic-analytics/data
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Do not place secret values in unit files, repository files, shell history, or command arguments.
-
-## 4) Validate Before Running
-
-OpenClaw/ClawHub installs can run in two modes:
-
-- Repo mode: local `scripts/openclaw-growth-start.mjs` is available at the workspace root.
-- ClawHub layout: the skill lives under `skills/product-manager-skill/`; copy runtime to the workspace root once with `bash skills/product-manager-skill/scripts/bootstrap-openclaw-workspace.sh`, then use the commands below.
-- Portable mode: no repo scripts; run setup + first pass directly from `analyticscli` + GitHub API checks.
-
-Portable mode must not ask for manual analytics summary files during `start/run`.
-Missing repo scripts or other workspace-local helper files alone must not block execution.
-
-Preferred (auto setup + first run orchestration):
-
-```bash
-node scripts/openclaw-growth-start.mjs --config data/openclaw-growth-engineer/config.json
-```
-
-Setup-only (no first run):
-
-```bash
-node scripts/openclaw-growth-start.mjs --config data/openclaw-growth-engineer/config.json --setup-only
-```
-
-Run preflight:
-
-```bash
-node scripts/openclaw-growth-preflight.mjs --config data/openclaw-growth-engineer/config.json --test-connections
-```
-
-The check validates:
-
-- config file readability
-- source paths/commands
-- required binaries (`analyticscli`, `python3`)
-- required skill availability (`analyticscli-cli`)
-- optional chart dependency (`matplotlib`)
-- recommended env vars for code-aware analysis (`GITHUB_TOKEN`) and required env vars for enabled delivery channels
-- live connector/API smoke tests for enabled channels
-
-The config also supports:
+Set in config:
 
 - `actions.mode = "issue"`
-- `actions.mode = "pull_request"`
-- extra connectors via `sources.extra[]` for tools such as GlitchTip, ASC CLI, or store review exports
+- or `actions.mode = "pull_request"`
+
+PR mode creates proposal branches and draft PRs with `.openclaw/proposals/...md` files.
+
+## 4) Configure Connectors
+
+Built-in sources:
+
+- `analytics`
+- `revenuecat`
+- `sentry`
+- `feedback`
+
+Extra sources:
+
+- add entries to `sources.extra[]`
+- use `mode=file` for the most stable setup
+- use `mode=command` only when the command deterministically returns JSON
+
+Recommended mobile extras:
+
+- `glitchtip`
+- `asc-cli`
+- `app-store-reviews`
+- `play-console`
 
 For Apple-platform apps, ask whether to connect the `asc` CLI plus the App Store Connect agent skill for App Store Connect Analytics data only.
 Use it for monthly analytics reports, not release/TestFlight/pricing/admin workflows.
@@ -175,67 +114,77 @@ RevenueCat setup:
 - For server-side summaries use a secret API key from RevenueCat -> Project Settings -> API Keys -> + New secret API key.
 - Prefer v2 read permissions for charts/metrics and required project configuration resources; store as `REVENUECAT_API_KEY`.
 
-## 5) Data Refresh Workflow
+Sentry setup:
 
-The runner consumes summary files. Update them before each cycle:
+- Ask whether to connect Sentry for crash, error, release, and performance signals.
+- Use the wizard to collect `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_ENVIRONMENT`, and optional `SENTRY_BASE_URL`.
+- Use read-only Sentry API scopes: `org:read`, `project:read`, and `event:read`.
+- The direct source command is `node scripts/export-sentry-summary.mjs`; optional MCP config uses `@sentry/mcp-server@latest` when `npx` is available.
+- Treat Sentry as connected only after auth and exporter smoke tests pass.
 
-- `analytics_summary.json` from AnalyticsCLI queries
-- `revenuecat_summary.json` from RevenueCat MCP/agent export
-- `sentry_summary.json` from Sentry MCP/agent export
-- optional `feedback_summary.json` from support/review aggregation
+## 5) Store Secrets
 
-## 6) Code Readiness Requirements
+Prefer OpenClaw secret storage.
+Inject env vars at runtime only.
 
-To ensure reliable file/module mapping:
+Never store secrets in:
 
-- run analyzer with `--repo-root <target-repo-root>`
-- ensure runner user has read access to that repo
-- optionally scope scan with `--code-roots apps,packages`
+- repo files
+- config JSON
+- shell history
+- issue/PR content
 
-If code cannot be read, generated issue file mappings are low-confidence.
-
-## 7) Charts (matplotlib)
-
-Generate chart manifest:
-
-```bash
-python3 scripts/openclaw-growth-charts.py \
-  --analytics data/openclaw-growth-engineer/analytics_summary.json \
-  --out-dir data/openclaw-growth-engineer/charts \
-  --manifest data/openclaw-growth-engineer/charts.manifest.json
-```
-
-Pass manifest to analyzer:
+## 6) Validate
 
 ```bash
-node scripts/openclaw-growth-engineer.mjs \
-  --analytics data/openclaw-growth-engineer/analytics_summary.json \
-  --repo-root . \
-  --chart-manifest data/openclaw-growth-engineer/charts.manifest.json \
-  --max-issues 4
+node scripts/openclaw-growth-preflight.mjs --config data/openclaw-growth-engineer/config.json --test-connections
 ```
 
-## 8) GitHub Creation Modes
+Checks include:
 
-Use a fine-grained `GITHUB_TOKEN` (no full-account token needed).
-For analysis-only runs, readable repo/code access is enough.
-Add issue or pull-request write scopes only when the command should create GitHub artifacts:
+- `analyticscli` package install/update and binary availability
+- `analyticscli-cli` skill presence
+- readable GitHub repo access when available for code-aware analysis
+- connector file/command readiness
+- required secrets for enabled sources and delivery modes
+- live smoke tests where possible
+
+## 7) Run
+
+One pass:
 
 ```bash
-node scripts/openclaw-growth-engineer.mjs \
-  --analytics data/openclaw-growth-engineer/analytics_summary.json \
-  --revenuecat data/openclaw-growth-engineer/revenuecat_summary.json \
-  --sentry data/openclaw-growth-engineer/sentry_summary.json \
-  --repo-root . \
-  --create-issues \
-  --repo owner/repo \
-  --labels ai-growth,autogenerated,product
+node scripts/openclaw-growth-runner.mjs --config data/openclaw-growth-engineer/config.json
 ```
 
-Recommended guardrails:
+Loop:
 
-- max 3-5 issues per run
-- `skipIfNoDataChange=true`
-- `skipIfIssueSetUnchanged=true`
+```bash
+node scripts/openclaw-growth-runner.mjs --config data/openclaw-growth-engineer/config.json --loop
+```
 
-Draft pull-request mode is also supported. In that mode the runner creates proposal branches and draft PRs with `.openclaw/proposals/...md` files instead of issues.
+## 8) Feedback Collection
+
+Optional local feedback API:
+
+```bash
+FEEDBACK_API_TOKEN=<token> node scripts/openclaw-feedback-api.mjs --port 4310
+```
+
+Expected payload fields now support:
+
+- `feedback`
+- `location` / `locationId`
+- `appSurface`
+- `metadata`
+
+The generated summary aggregates recurring themes and top feedback locations.
+
+## 9) Mobile Feedback Best Practice
+
+- Use tenant-owned backend/proxy endpoints for app-side feedback submission
+- Keep `locationId` stable and code-oriented
+- Example ids:
+  - `onboarding/paywall`
+  - `settings/restore`
+  - `profile/delete_account`
