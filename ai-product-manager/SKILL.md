@@ -3,7 +3,7 @@ name: product-manager-skill
 description: OpenClaw-first AI product manager for turning analytics, revenue, crash, store, and feedback signals into execution-ready proposals and backlog work.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.0.61","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"]}}}
+metadata: {"author":"wotaso","version":"1.0.62","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"]}}}
 ---
 
 # AI Product Manager
@@ -27,6 +27,14 @@ Prefer the standalone `openclaw` CLI as the runtime surface.
 The CLI is intentionally non-AI. OpenClaw should stay the only conversational and implementation layer.
 Use the CLI to gather signals, generate proposals, schedule checks, and send deliveries.
 If the user later asks OpenClaw to implement a proposal, OpenClaw should inspect the generated drafts and then use OpenClaw itself to do the work.
+
+Implementation PR rule:
+
+- If the user asks for a GitHub issue plus a pull request, or says "create a PR", "make the PR", "implement this", "fix the app", or close variants after a product/growth analysis, OpenClaw must create an implementation PR with production app code changes in the target repository.
+- Do not satisfy that request with a proposal-only markdown PR. The CLI's proposal PR mode is only for explicit requests such as "make a proposal PR", "planning PR", "draft proposal", or scheduled proposal delivery.
+- A PR that only adds `.openclaw/proposals/*.md`, docs, or markdown planning files is not a valid implementation PR unless the user explicitly requested a proposal-only artifact.
+- For implementation PRs, OpenClaw must inspect the app repo, create or reuse a branch, edit the relevant app files, run targeted checks where feasible, then open/update the PR. Use GitHub issue creation for tracking, but keep the PR focused on real app behavior.
+- If the implementation cannot be completed because repo write access, branch access, or local checkout is unavailable, say that directly and do not create a placeholder markdown PR.
 
 ## Customization Boundary
 
@@ -214,7 +222,7 @@ The CLI can write proposals to one or more targets:
 
 - `deliveries.openclawChat.enabled = true`: write `.openclaw/chat/latest.md` and `.openclaw/chat/latest.json` for OpenClaw to pick up in chat
 - `deliveries.github.mode = "issue"` with `deliveries.github.autoCreate = true`: create implementation-ready GitHub issues
-- `deliveries.github.mode = "pull_request"` with `deliveries.github.autoCreate = true`: create draft PRs that add `.openclaw/proposals/...md` proposal files to the repo
+- `deliveries.github.mode = "pull_request"` with `deliveries.github.autoCreate = true`: create proposal-only draft PRs that add `.openclaw/proposals/...md` proposal files to the repo. Use this only for explicit proposal delivery, not when the user asks OpenClaw to implement changes.
 
 ## Connector Model
 
