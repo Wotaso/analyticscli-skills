@@ -55,7 +55,7 @@ Important:
 - Missing local repo scripts must not be treated as hard stop; portable mode is required.
 - Missing workspace files under `scripts/` or `data/` must not be treated as blockers in portable mode.
 - Setup should guide the developer with detected status, why each missing value matters, where to get it, and the minimum required permission.
-- Setup must ask which connections the user wants to configure before requesting optional credentials: AnalyticsCLI, GitHub code access, ASC CLI for App Store Connect Analytics data, RevenueCat, Sentry/GlitchTip, Feedback/App Reviews, or skip.
+- Setup must ask which connections the user wants to configure before requesting optional credentials: AnalyticsCLI baseline with feedback summaries, GitHub code access, ASC / App Store Connect CLI, RevenueCat, Sentry-compatible crash monitoring including Sentry Cloud and GlitchTip accounts, or skip.
 
 ## Required Tooling And Data Connectors
 
