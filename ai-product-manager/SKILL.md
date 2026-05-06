@@ -3,7 +3,7 @@ name: product-manager-skill
 description: OpenClaw-first AI product manager for turning analytics, revenue, crash, store, and feedback signals into execution-ready proposals and backlog work.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.0.70","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"]}}}
+metadata: {"author":"wotaso","version":"1.0.71","openclaw":{"emoji":"📌","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["node","analyticscli"]}}}
 ---
 
 # AI Product Manager
@@ -306,7 +306,7 @@ Sentry setup guidance:
 
 - Ask: "Soll Sentry fuer Crash-, Error- und Performance-Signale verbunden werden?"
 - Use the direct Sentry API exporter as the canonical growth source: `node scripts/export-sentry-summary.mjs`.
-- The wizard should ask for one Sentry-compatible account by default: `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_ENVIRONMENT`, and optional `SENTRY_BASE_URL` for self-hosted Sentry. Do not ask for `SENTRY_PROJECT` in the setup wizard; defer project scope to app/repo/release context, or configure `sources.sentry.accounts[].projects[]` only when a fixed account-project mapping is known. When the user has multiple Sentry-compatible accounts, configure `sources.sentry.accounts[]` with separate `baseUrl`, `tokenEnv`, `org`, `projects[]`, and `environment` values for each account, for example Sentry Cloud plus self-hosted GlitchTip.
+- The wizard should configure one or more Sentry-compatible accounts directly. For each account, ask for label, `baseUrl`, `tokenEnv`, token, `org`, `environment`, and optional comma-separated `projects[]`. Do not ask for a single global `SENTRY_PROJECT`; defer project scope to app/repo/release context unless the user provides known fixed projects for that account. Use this for Sentry Cloud plus self-hosted GlitchTip with separate tokens and projects.
 - Tell the user to create a Sentry auth token at https://sentry.io/settings/account/api/auth-tokens/ with read-only API scopes `org:read`, `project:read`, and `event:read`.
 - Configure optional Sentry MCP through `@sentry/mcp-server@latest` when `npx` and `SENTRY_AUTH_TOKEN` are available, but do not ask for broader write scopes unless the user explicitly wants Sentry mutation workflows.
 - Mark Sentry connected only after the auth check and exporter smoke test pass. Do not infer Sentry access from a token being present.
