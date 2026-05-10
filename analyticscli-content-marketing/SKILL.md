@@ -3,7 +3,7 @@ name: analyticscli-content-marketing
 description: Internal/private playbook for creating human-quality AnalyticsCLI and AI Growth Engineer blog posts, SEO pages, LLM-readable content, and launch copy.
 license: UNLICENSED
 homepage: https://analyticscli.com
-metadata: {"author":"wotaso","version":"0.1.0","private":true,"audience":"internal","publish":"do-not-list"}
+metadata: {"author":"wotaso","version":"0.1.1","private":true,"audience":"internal","publish":"do-not-list"}
 ---
 
 # AnalyticsCLI Content Marketing
@@ -36,6 +36,16 @@ Use concise wording such as:
 ## Editorial Standard
 
 Content must be useful even if the reader never buys AnalyticsCLI.
+
+## Product Fact Recovery
+
+When drafting or reviewing exposes a product/docs/CLI/SDK mismatch, broken workflow, or missing capability:
+
+1. Check the newest relevant skill, CLI, or SDK version first instead of writing around stale behavior.
+2. Re-verify the product fact against the updated artifact.
+3. If no newer version is available, the update is blocked, or the newest version still has the gap, submit concise AnalyticsCLI product feedback with `analyticscli feedback submit`.
+
+Feedback is for the AnalyticsCLI SaaS owner about AnalyticsCLI itself. Do not confuse it with tenant-owned end-user feedback. Include the content surface, checked version/update attempt, expected behavior, actual behavior, and any temporary wording or workaround used.
 
 ## Headlines
 

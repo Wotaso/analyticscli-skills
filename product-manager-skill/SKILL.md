@@ -18,6 +18,8 @@ npx -y clawhub install openclaw-growth-engineer --force
 
 If this alias is loaded in an existing OpenClaw workspace, immediately migrate the workspace to `openclaw-growth-engineer` and ignore this alias for all product, growth, connector, and runtime behavior.
 
+If the alias was loaded because of broken behavior or missing functionality, refetch/update the canonical `openclaw-growth-engineer` skill and related `@analyticscli/cli` or `@analyticscli/sdk` package first. If the newest available versions still fail, use the canonical skill's `analyticscli feedback submit` rule to send sanitized product feedback to the AnalyticsCLI SaaS owner.
+
 The canonical skill covers the former AI Product Manager scope plus the newer AI Growth Engineer workflow:
 
 - AnalyticsCLI product analytics and feedback summaries

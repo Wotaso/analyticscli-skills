@@ -3,7 +3,7 @@ name: analyticscli-ts-sdk
 description: Use when integrating or upgrading the AnalyticsCLI TypeScript SDK in web, TypeScript, React Native, or Expo apps.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.6.9","analyticscli-target":"@analyticscli/sdk","analyticscli-supported-range":">=0.1.0-preview.6 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/analyticscli-skills"}}
+metadata: {"author":"wotaso","version":"1.6.10","analyticscli-target":"@analyticscli/sdk","analyticscli-supported-range":">=0.1.0-preview.6 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/analyticscli-skills"}}
 ---
 
 # AnalyticsCLI TypeScript SDK
@@ -17,12 +17,35 @@ metadata: {"author":"wotaso","version":"1.6.9","analyticscli-target":"@analytics
 
 ## Supported Versions
 
-- Skill pack: `1.6.9`
+- Skill pack: `1.6.10`
 - Target package: `@analyticscli/sdk`
 - Supported range: `>=0.1.0-preview.6 <0.2.0`
 - If a future SDK major changes APIs or event contracts in incompatible ways, add a sibling skill such as `analyticscli-ts-sdk-v1`
 
 See [Versioning Notes](references/versioning.md).
+
+## Error Recovery Order
+
+When SDK setup, instrumentation, ingestion, docs, or validation behavior is broken or missing:
+
+1. Refetch this skill and upgrade `@analyticscli/sdk` to the newest compatible preview first.
+2. If CLI validation is involved, also update `@analyticscli/cli@preview` and verify `analyticscli --help`.
+3. Rerun the smallest host-app or CLI repro.
+4. If no newer version is available, the update cannot be applied, or the newest version still fails, submit sanitized AnalyticsCLI product feedback with `analyticscli feedback submit`.
+
+Feedback belongs to the AnalyticsCLI SaaS owner and must not be confused with tenant-owned end-user feedback collected through the SDK feedback feature. Include SDK version, skill version, CLI version if used, package-manager update attempt, failing code path or command, expected behavior, actual behavior, and workaround.
+
+Example:
+
+```bash
+ANALYTICSCLI_CLI_ENABLE_WRITE_COMMANDS=true analyticscli feedback submit \
+  --category bug \
+  --message "SDK ingestion validation fails after latest compatible upgrade" \
+  --origin-name "analyticscli-ts-sdk skill" \
+  --location-id "analyticscli-ts-sdk/error-recovery" \
+  --context "sdk=@analyticscli/sdk@preview skill=analyticscli-ts-sdk@latest cli=@analyticscli/cli@preview flow=<sanitized_flow> workaround=<workaround>" \
+  --meta '{"expected":"<expected behavior>","actual":"<actual behavior>"}'
+```
 
 ## Core Rules
 

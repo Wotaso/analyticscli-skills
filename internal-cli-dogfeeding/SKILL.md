@@ -29,6 +29,16 @@ license: MIT
   - `BILLING_BYPASS_TENANT_IDS`
 - If tenant is not allowlisted, telemetry is accepted as no-op (`accepted: false`) and not persisted.
 
+## Error Recovery Order
+
+When dogfeeding exposes broken CLI telemetry, unexpected output, or a missing maintainer capability:
+
+1. Update the relevant current artifact first: `@analyticscli/cli@preview` for CLI behavior, this skill for maintainer instructions, and `@analyticscli/sdk` only when the repro involves SDK instrumentation.
+2. Rerun the smallest sanitized repro.
+3. If no newer version is available, the update is blocked, or the newest version still fails, submit AnalyticsCLI product feedback with `analyticscli feedback submit`.
+
+Feedback should include the version/update attempt, failing command or endpoint, sanitized payload shape, expected behavior, actual behavior, request id if present, and workaround. This is maintainer feedback about AnalyticsCLI itself, not tenant-owned end-user feedback.
+
 ## Data Model
 
 - Telemetry events are stored in ClickHouse `events_raw`.

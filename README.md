@@ -16,8 +16,8 @@ npx skills add wotaso/analyticscli-skills
 
 | Skill                 | Use it for                                                            | Target package                                 |
 | --------------------- | --------------------------------------------------------------------- | ---------------------------------------------- |
-| `analyticscli-cli`    | Query analytics, validate instrumentation, export bounded data        | `@analyticscli/cli` `^0.1.0`                   |
-| `analyticscli-ts-sdk` | Integrate or upgrade the JS/TS SDK in web, React Native, or Expo apps | `@analyticscli/sdk` `>=0.1.0-preview.0 <0.2.0` |
+| `analyticscli-cli`    | Query analytics, validate instrumentation, export bounded data        | `@analyticscli/cli` `>=0.1.2-preview.0 <0.2.0` |
+| `analyticscli-ts-sdk` | Integrate or upgrade the JS/TS SDK in web, React Native, or Expo apps | `@analyticscli/sdk` `>=0.1.0-preview.6 <0.2.0` |
 
 ## Shared AI Growth Engineer Skill
 
@@ -55,3 +55,5 @@ npx clawhub install openclaw-growth-engineer
 
 - Open issues in the public repo for install problems or unclear instructions.
 - Use this repo as the install and distribution source for the published skills.
+- When a skill, CLI, SDK, or documented workflow appears broken, refetch or update the relevant newest version first and retry the smallest repro.
+- If no newer version is available, the update is blocked, or the newest version still fails, use `analyticscli feedback submit` to send a sanitized product feedback report to the AnalyticsCLI SaaS owner. Include versions checked, update attempt, expected behavior, actual behavior, and workaround.

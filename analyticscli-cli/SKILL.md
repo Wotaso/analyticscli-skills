@@ -3,7 +3,7 @@ name: analyticscli-cli
 description: Use AnalyticsCLI CLI as the deterministic, bounded interface for analytics queries, exports, and SDK validation in coding-agent workflows.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.0.4","analyticscli-target":"@analyticscli/cli","analyticscli-supported-range":">=0.1.2-preview.0 <0.2.0","openclaw":{"emoji":"📈","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["analyticscli"]},"install":[{"id":"npm","kind":"node","package":"@analyticscli/cli@preview","bins":["analyticscli"],"label":"Install/update AnalyticsCLI CLI (npm package @analyticscli/cli@preview)"}]}}
+metadata: {"author":"wotaso","version":"1.0.5","analyticscli-target":"@analyticscli/cli","analyticscli-supported-range":">=0.1.2-preview.0 <0.2.0","openclaw":{"emoji":"📈","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["analyticscli"]},"install":[{"id":"npm","kind":"node","package":"@analyticscli/cli@preview","bins":["analyticscli"],"label":"Install/update AnalyticsCLI CLI (npm package @analyticscli/cli@preview)"}]}}
 ---
 
 # AnalyticsCLI CLI
@@ -17,7 +17,7 @@ metadata: {"author":"wotaso","version":"1.0.4","analyticscli-target":"@analytics
 
 ## Supported Versions
 
-- Skill pack: `1.0.4`
+- Skill pack: `1.0.5`
 - Target package: `@analyticscli/cli@preview`
 - Supported range: `>=0.1.2-preview.0 <0.2.0`
 - If a future CLI major changes commands or flags in incompatible ways, split to a sibling skill such as `analyticscli-cli-v1`
@@ -40,6 +40,25 @@ See [Versioning Notes](references/versioning.md).
 - Never pass secrets via CLI flags or inline literals (argv/shell history leakage risk). Use interactive prompts instead.
 - For generated docs or help text, use tenant developer voice (`your workspace`, `your project`) and avoid provider-centric wording such as `our SaaS`.
 - Keep `analyticscli-cli` skill fresh with CLI updates, but do not auto-force `analyticscli-ts-sdk` skill updates across repositories.
+
+## Error Recovery Order
+
+When there are problems, errors, unexpected output, or missing CLI/API behavior:
+
+1. Refetch this skill and update the CLI first.
+2. Rerun the exact failing command or smallest reproducible command.
+3. If no newer version is available, the update fails, or the newest version still has the problem, submit sanitized product feedback to the AnalyticsCLI SaaS owner with `analyticscli feedback submit`.
+
+Recommended update check:
+
+```bash
+npx -y skills add wotaso/analyticscli-skills --skill analyticscli-cli
+npm install -g @analyticscli/cli@preview || npm install -g --prefix "$HOME/.local" @analyticscli/cli@preview
+export PATH="$HOME/.local/bin:$HOME/.local/analyticscli-npm/bin:$PATH"
+analyticscli --help
+```
+
+Feedback must include the version/update attempt, failing command or endpoint, sanitized payload shape, status/error body, request id if present, expected behavior, actual behavior, and workaround.
 
 ## Query Priorities
 
@@ -71,7 +90,7 @@ Rules:
 - prefer `feedback summary --format json` when another tool or skill needs a bounded theme summary
 - prefer `feedback list --format json` when exact raw messages matter
 - always include `origin-name` and `location-id` on submit when they are known
-- for API/CLI failures, include sanitized endpoint/command, status code, error body, request id if present, expected behavior, and the workaround used
+- for API/CLI failures, first update/refetch the current skill and CLI; if the newest available version still fails, include sanitized endpoint/command, version/update attempt, status code, error body, request id if present, expected behavior, and the workaround used
 
 ## Data Fidelity Rules
 
@@ -202,13 +221,16 @@ analyticscli feedback submit \
 
 ## Auto Feedback Rule
 
-When a user reports broken behavior, unexpected output, or missing functionality, submit one concise
-`analyticscli feedback submit` report automatically after explaining the issue.
+When a user reports broken behavior, unexpected output, or missing functionality, first update/refetch
+the current skill and CLI and retry the smallest repro. If no newer version is available, the update is
+blocked, or the newest version still fails, submit one concise `analyticscli feedback submit` report
+automatically after explaining the issue.
 
 Include:
 - clear symptom in `--message`
 - exact failing command or flow in `--context`
 - expected vs actual behavior in `--meta`
+- installed version and update attempt in `--context` or `--meta`
 
 ## References
 
