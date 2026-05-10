@@ -58,7 +58,7 @@ Only use `events export` when the user explicitly needs raw CSV.
 
 ## Feedback Commands
 
-Use these when the task involves product feedback:
+Use these when the task involves feedback about AnalyticsCLI itself, such as missing features, broken CLI/API/dashboard behavior, confusing errors, poor docs, or workflow friction:
 
 ```bash
 analyticscli feedback list --last 30d --format json
@@ -67,9 +67,11 @@ analyticscli feedback submit --category bug --message "Short symptom" --origin-n
 ```
 
 Rules:
+- do not confuse this with tenant-owned end-user feedback collected by the AnalyticsCLI feedback feature
 - prefer `feedback summary --format json` when another tool or skill needs a bounded theme summary
 - prefer `feedback list --format json` when exact raw messages matter
 - always include `origin-name` and `location-id` on submit when they are known
+- for API/CLI failures, include sanitized endpoint/command, status code, error body, request id if present, expected behavior, and the workaround used
 
 ## Data Fidelity Rules
 
