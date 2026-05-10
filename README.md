@@ -19,13 +19,20 @@ npx skills add wotaso/analyticscli-skills
 | `analyticscli-cli`    | Query analytics, validate instrumentation, export bounded data        | `@analyticscli/cli` `^0.1.0`                   |
 | `analyticscli-ts-sdk` | Integrate or upgrade the JS/TS SDK in web, React Native, or Expo apps | `@analyticscli/sdk` `>=0.1.0-preview.0 <0.2.0` |
 
-## OpenClaw Growth Skill
+## Shared AI Growth Engineer Skill
 
-The former `ai-product-manager` skill is deprecated. Use the canonical OpenClaw
-Growth Engineer skill for product, growth, connector, and autopilot workflows.
+The former `ai-product-manager` skill is deprecated. Use the canonical
+`openclaw-growth-engineer` skill for product, growth, connector, and autopilot
+workflows across OpenClaw, Hermes, and compatible `SKILL.md` clients.
 
 ```bash
 npx clawhub install openclaw-growth-engineer
+```
+
+For Hermes, install the same public skill repository:
+
+```bash
+hermes skills install Wotaso/openclaw-growth-engineer-skill
 ```
 
 ## ClawHub
