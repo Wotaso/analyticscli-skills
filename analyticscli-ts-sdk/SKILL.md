@@ -118,6 +118,8 @@ When helping a developer set up the SDK, make the flow guided and verifiable.
 ## Feedback Collection Rules
 
 - If the app collects qualitative feedback, prefer the SDK `feedback` config plus `submitFeedback(...)` instead of a separate ad-hoc client.
+- Do not use legacy `analytics.feedback(message, rating, properties)` for end-user feedback that must appear in the AnalyticsCLI dashboard feedback inbox. It only emits an analytics event through ingest (`/v1/collect`) and does not create a stored feedback message.
+- If the installed SDK version does not expose `submitFeedback(...)`, use the official public feedback endpoint directly: `POST <feedback.serviceUrl>/v1/feedback` with `x-feedback-key` (or `x-api-key`) and a body containing `feedback`, `location`/`locationId`, `appSurface`/`surface`, `originName`, and optional `metadata`.
 - Always include both a stable `locationId` and a human-readable `originName`.
 - `locationId` should stay code-stable (`settings/restore`, `onboarding/paywall`).
 - `originName` should explain the exact product surface or UI origin (`restore purchases footer`, `paywall dismiss modal`).
