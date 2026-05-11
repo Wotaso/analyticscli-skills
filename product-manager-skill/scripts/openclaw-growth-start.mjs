@@ -7,6 +7,9 @@ import { getActionMode, getDefaultSourceCommand } from './openclaw-growth-shared
 import { loadOpenClawGrowthSecrets } from './openclaw-growth-env.mjs';
 const DEFAULT_CONFIG_PATH = 'data/openclaw-growth-engineer/config.json';
 const DEFAULT_TEMPLATE_PATH = 'data/openclaw-growth-engineer/config.example.json';
+const DEFAULT_HEARTBEAT_PATH = 'HEARTBEAT.md';
+const HEARTBEAT_MARKER_START = '<!-- openclaw-growth-engineer:start -->';
+const HEARTBEAT_MARKER_END = '<!-- openclaw-growth-engineer:end -->';
 const ANALYTICSCLI_PACKAGE_SPEC = process.env.ANALYTICSCLI_CLI_PACKAGE || '@analyticscli/cli@preview';
 const ANALYTICSCLI_NPM_PREFIX = process.env.ANALYTICSCLI_NPM_PREFIX ||
     (process.env.HOME ? path.join(process.env.HOME, '.local') : path.join(process.cwd(), '.analyticscli-npm'));
@@ -425,6 +428,75 @@ async function writeJson(filePath, value) {
     await fs.mkdir(path.dirname(filePath), { recursive: true });
     await fs.writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
 }
+function formatHeartbeatInterval(minutes) {
+    const intervalMinutes = Math.max(1, Math.floor(Number(minutes) || 1440));
+    if (intervalMinutes % 1440 === 0)
+        return `${intervalMinutes / 1440}d`;
+    if (intervalMinutes % 60 === 0)
+        return `${intervalMinutes / 60}h`;
+    return `${intervalMinutes}m`;
+}
+function getHeartbeatInterval(config) {
+    const configured = Number(config?.schedule?.intervalMinutes);
+    return Number.isFinite(configured) && configured > 0 ? configured : 1440;
+}
+function relativeWorkspacePath(filePath) {
+    const relative = path.relative(process.cwd(), filePath);
+    return relative && !relative.startsWith('..') && !path.isAbsolute(relative) ? relative : filePath;
+}
+function isEffectivelyEmptyHeartbeat(value) {
+    return String(value || '')
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter((line) => line && !line.startsWith('#') && !line.startsWith('<!--') && !line.startsWith('-->'))
+        .length === 0;
+}
+function renderHeartbeatBlock(configPath, config) {
+    const interval = formatHeartbeatInterval(getHeartbeatInterval(config));
+    const displayConfigPath = relativeWorkspacePath(configPath);
+    return `${HEARTBEAT_MARKER_START}
+tasks:
+
+- name: openclaw-growth-engineer-run
+  interval: ${interval}
+  prompt: "Run \`node scripts/openclaw-growth-runner.mjs --config ${displayConfigPath}\` from the workspace if the config and runtime files exist. The runner owns schedule.cadences, connectorHealthCheckIntervalMinutes, skipIfNoDataChange, and skipIfIssueSetUnchanged. If it reports connector-health alerts, production crashes, generated issues, or actionable growth findings, summarize only the action and evidence. If setup files are missing, tell the user to run \`node scripts/openclaw-growth-wizard.mjs --connectors\`. If there is no actionable output, reply HEARTBEAT_OK."
+
+# Keep this section small. Do not put secrets in HEARTBEAT.md.
+${HEARTBEAT_MARKER_END}`;
+}
+async function ensureGrowthHeartbeat(configPath, config) {
+    const heartbeatPath = path.resolve(DEFAULT_HEARTBEAT_PATH);
+    const block = renderHeartbeatBlock(configPath, config);
+    let existing = '';
+    let existed = true;
+    try {
+        existing = await fs.readFile(heartbeatPath, 'utf8');
+    }
+    catch {
+        existed = false;
+    }
+    const markerPattern = new RegExp(`${HEARTBEAT_MARKER_START}[\\s\\S]*?${HEARTBEAT_MARKER_END}`);
+    const next = markerPattern.test(existing)
+        ? existing.replace(markerPattern, block)
+        : isEffectivelyEmptyHeartbeat(existing)
+            ? `# OpenClaw heartbeat checklist\n\n${block}\n`
+            : `${existing.trimEnd()}\n\n${block}\n`;
+    if (next !== existing) {
+        await fs.writeFile(heartbeatPath, next, 'utf8');
+        return {
+            path: heartbeatPath,
+            interval: formatHeartbeatInterval(getHeartbeatInterval(config)),
+            created: !existed || isEffectivelyEmptyHeartbeat(existing),
+            updated: existed && !isEffectivelyEmptyHeartbeat(existing),
+        };
+    }
+    return {
+        path: heartbeatPath,
+        interval: formatHeartbeatInterval(getHeartbeatInterval(config)),
+        created: false,
+        updated: false,
+    };
+}
 async function appendHelperDetail(details, label, result) {
     if (result.ok) {
         details.push(`${label}: ok`);
@@ -719,7 +791,7 @@ async function installAnalyticsConnector() {
         connector: 'analytics',
         ok: Boolean(analyticsCliPath),
         detail: analyticsCliPath
-            ? `analyticscli binary found at ${analyticsCliPath}; token is read from ANALYTICSCLI_ACCESS_TOKEN or local analyticscli login`
+            ? `analyticscli binary found at ${analyticsCliPath}; token is read from the wizard-managed AnalyticsCLI environment`
             : 'analyticscli binary missing after dependency setup',
     };
 }
@@ -1200,7 +1272,7 @@ function remediationForCheck(checkName, configPath) {
         return 'Write `data/openclaw-growth-engineer/analytics_summary.json` via your analytics refresh step (API-key based source command/file generation).';
     }
     if (checkName === 'connection:analytics') {
-        return 'Paste a fresh AnalyticsCLI readonly CLI token in the connector wizard, or run `analyticscli login` and paste the token when prompted.';
+        return 'Run `node scripts/openclaw-growth-wizard.mjs --connectors analytics` and paste a fresh AnalyticsCLI readonly CLI token into the local terminal wizard.';
     }
     if (checkName === 'connection:github') {
         return 'Verify `GITHUB_TOKEN` and repo access to `/repos/<owner>/<repo>` + issues API.';
@@ -1269,6 +1341,7 @@ async function main() {
     const args = parseArgs(process.argv.slice(2));
     const configPath = path.resolve(args.config);
     const configResult = await ensureConfig(configPath);
+    const heartbeat = await ensureGrowthHeartbeat(configPath, await readJson(configPath));
     const projectConfigured = await configureAnalyticsProject(configPath, args.project);
     const ascAppConfiguredFromArg = await configureAscApp(configPath, args.ascApp);
     const analyticscliEnsure = await ensureAnalyticsCliInstalled();
@@ -1278,6 +1351,7 @@ async function main() {
             phase: 'dependency_setup',
             configCreated: configResult.created,
             configPath,
+            heartbeat,
             projectConfigured,
             ascAppConfigured: ascAppConfiguredFromArg,
             blockers: [
@@ -1318,6 +1392,7 @@ async function main() {
             phase: 'connector_setup',
             configCreated: configResult.created,
             configPath,
+            heartbeat,
             projectConfigured,
             ascAppConfigured: ascAppConfiguredFromArg,
             connectorSetup,
@@ -1327,7 +1402,7 @@ async function main() {
                 remediation: entry.connector === 'analytics'
                     ? 'Paste a fresh AnalyticsCLI readonly token into the connector wizard so it can store ANALYTICSCLI_ACCESS_TOKEN.'
                     : entry.connector === 'github'
-                        ? 'Install GitHub CLI (`gh`) and run `gh auth login`, or provide a fine-grained read-only token for code access.'
+                        ? 'Provide a GitHub token through the connector wizard for code access.'
                         : entry.connector === 'asc'
                             ? 'Install the ASC CLI and provide ASC_KEY_ID, ASC_ISSUER_ID, and ASC_PRIVATE_KEY_PATH or ASC_PRIVATE_KEY. Resolve the app after auth succeeds.'
                             : entry.connector === 'sentry'
@@ -1384,6 +1459,7 @@ async function main() {
             phase: 'asc_app_setup',
             configCreated: configResult.created,
             configPath,
+            heartbeat,
             projectConfigured: projectConfigured || analyticsProjectSetup.configured,
             analyticsProjectId: analyticsProjectSetup.projectId || null,
             ascAppConfigured: false,
@@ -1422,6 +1498,7 @@ async function main() {
             phase: 'preflight',
             configCreated: configResult.created,
             configPath,
+            heartbeat,
             projectConfigured: projectConfigured || analyticsProjectSetup.configured,
             analyticsProjectId: analyticsProjectSetup.projectId || null,
             ascAppConfigured: ascAppSetup.configured,
@@ -1441,6 +1518,7 @@ async function main() {
             phase: 'setup_complete',
             configCreated: configResult.created,
             configPath,
+            heartbeat,
             projectConfigured: projectConfigured || analyticsProjectSetup.configured,
             analyticsProjectId: analyticsProjectSetup.projectId || null,
             ascAppConfigured: ascAppSetup.configured,
@@ -1468,6 +1546,7 @@ async function main() {
             phase: 'first_run',
             configCreated: configResult.created,
             configPath,
+            heartbeat,
             projectConfigured,
             error: rawError,
         }, null, 2)}\n`);
@@ -1480,6 +1559,7 @@ async function main() {
         phase: 'first_run_complete',
         configCreated: configResult.created,
         configPath,
+        heartbeat,
         projectConfigured,
         actionMode,
         runnerOutput: runResult.stdout.trim(),
