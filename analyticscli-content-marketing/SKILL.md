@@ -3,7 +3,14 @@ name: analyticscli-content-marketing
 description: Internal/private playbook for creating human-quality AnalyticsCLI and AI Growth Engineer blog posts, SEO pages, LLM-readable content, and launch copy.
 license: UNLICENSED
 homepage: https://analyticscli.com
-metadata: {"author":"wotaso","version":"0.1.1","private":true,"audience":"internal","publish":"do-not-list"}
+metadata:
+  {
+    'author': 'wotaso',
+    'version': '0.1.1',
+    'private': true,
+    'audience': 'internal',
+    'publish': 'do-not-list',
+  }
 ---
 
 # AnalyticsCLI Content Marketing
@@ -124,11 +131,11 @@ Use frontmatter matching `apps/landing/src/content/config.ts`:
 
 ```mdx
 ---
-title: "Specific Human Title"
-description: "One sentence that names the reader, problem, and outcome."
+title: 'Specific Human Title'
+description: 'One sentence that names the reader, problem, and outcome.'
 pubDate: 2026-05-07
-author: "AnalyticsCLI Team"
-image: "/blog/<slug>/cover.png"
+author: 'AnalyticsCLI Team'
+image: '/blog/<slug>/cover.png'
 tags:
   - AI Growth Engineer
   - Product Analytics
@@ -205,6 +212,57 @@ Preferred topic clusters:
 - App Store reviews as product feedback
 - GDPR-friendly analytics for agent workflows
 - using existing Codex/OpenClaw/Claude Code subscriptions more effectively
+
+## Programmatic SEO Research Loop
+
+Use `scripts/seo-research.mjs` before creating SEO pages at scale.
+
+Default cost-effective path:
+
+```bash
+pnpm seo:research:local -- --tool analyticscli --seed "analyticscli,product analytics cli,ai growth engineer"
+```
+
+For sibling tools, pass explicit seeds and product-fit terms instead of forcing the AnalyticsCLI profile:
+
+```bash
+pnpm seo:research:local -- \
+  --tool <tool-name> \
+  --seed "<tool-name>,<tool-name> cli,<tool-name> alternative" \
+  --product-term "<tool-name>,developer tools,automation"
+```
+
+Paid enrichment path, only when keyword metrics are needed:
+
+```bash
+DATAFORSEO_LOGIN=<login> DATAFORSEO_PASSWORD=<password> \
+  pnpm seo:research -- --provider dataforseo --confirm-paid --max-paid-requests 3
+```
+
+CSV-first path for Ahrefs, Semrush, DataForSEO, or Search Console exports:
+
+```bash
+pnpm seo:research:local -- --csv exports/ahrefs.csv --gsc-csv exports/search-console.csv
+```
+
+Rules:
+
+- DataForSEO is the default paid API because it is pay-as-you-go and easy to cap.
+- Ahrefs should usually be used through manual/CSV validation first; API usage is only justified once organic traffic converts and the weekly loop needs large-scale KD/traffic-potential checks.
+- Google Search Console data is free and should be used as soon as published pages receive impressions.
+- Never scrape Ahrefs' free UI.
+- Treat `data/seo/programmatic-seo-plan.json` as research input, not publishable content.
+- Create or update public pages only from `brief_ready` entries.
+- Keep pages `noindex` or unpublished when a brief cannot be filled with real commands, SDK examples, connector behavior, product screenshots, or measurable use-case evidence.
+- Do not publish hundreds of near-identical pages. Prefer fewer pages with specific intent, real examples, and useful internal links.
+
+Required review before publishing a programmatic SEO page:
+
+1. Verify the keyword has real demand from DataForSEO, Ahrefs/Semrush CSV, or Search Console.
+2. Confirm the page has a useful reason to exist beyond ranking.
+3. Add product-specific evidence: CLI command, SDK snippet, integration flow, analytics query, or Growth Engineer output shape.
+4. Check for duplicate/cannibalizing pages in `apps/landing/src/data/seo-pages.ts`, integrations, alternatives, docs, and blog.
+5. Build the landing app and inspect the generated page before publishing.
 
 ## Publishing Gate
 
