@@ -28,7 +28,7 @@ install/update automatically before using `analyticscli`.
 ## 2) Generate Config
 
 ```bash
-node scripts/openclaw-growth-wizard.mjs
+npx -y @analyticscli/growth-engineer@preview wizard
 ```
 
 The config is non-secret and commit-safe:
@@ -47,7 +47,7 @@ The setup flow should be developer-friendly:
 For GitHub, RevenueCat, Sentry, and App Store Connect connector setup, use the connector wizard instead of asking the user to compose setup commands manually:
 
 ```bash
-node scripts/openclaw-growth-wizard.mjs --connectors github,revenuecat,sentry,asc
+npx -y @analyticscli/growth-engineer@preview wizard --connectors github,revenuecat,sentry,asc
 ```
 
 The connector wizard asks only for the selected connectors, explains each provider step in the terminal, writes local secrets to `~/.config/openclaw-growth/secrets.env`, and runs helper setup for the selected connectors.
