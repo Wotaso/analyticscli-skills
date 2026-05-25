@@ -52,6 +52,7 @@ ANALYTICSCLI_CLI_ENABLE_WRITE_COMMANDS=true analyticscli feedback submit \
 - Initialize exactly once near app bootstrap.
 - For generated host-app code, prefer `init({ ... })` with explicit identity mode (`identityTrackingMode: 'consent_gated'`).
 - `init('<YOUR_APP_KEY>')` shortform is acceptable for quick demos/tests or low-level client-only integrations.
+- `initFromEnv(...)`, `initBrowserFromEnv(...)`, and `initReactNativeFromEnv(...)` are available for setup tooling and small apps; pass an explicit `env` object when the framework does not expose values on `process.env` (for example `env: import.meta.env` in Vite/Astro).
 - Keep setup options minimal: `apiKey` is enough for ingest.
 - In host apps, use client-safe publishable env names (for example `ANALYTICSCLI_PUBLISHABLE_API_KEY`).
 - Do not use `WRITE_KEY` env names in generated host-app snippets (`ANALYTICSCLI_WRITE_KEY`, `EXPO_PUBLIC_ANALYTICSCLI_WRITE_KEY`, etc.).
@@ -64,6 +65,7 @@ ANALYTICSCLI_CLI_ENABLE_WRITE_COMMANDS=true analyticscli feedback submit \
 - Treat `platform` as runtime family only (`web`/`ios`/`android`/`mac`/`windows`), not as OS version/name.
 - Treat `osName` as operating-system label (for example `iOS`, `Android`, `Windows`, `macOS`, `Web`). Prefer always setting/populating `osName`; keep `platform` optional.
 - `init(...)`/`new AnalyticsClient(...)` auto-emits one `session_start` event per client instance on SDK mount (`source: sdk_mount`), so host apps do not need manual startup wiring.
+- Browser clients automatically flush queued events on `pagehide`, hidden `visibilitychange`, and `beforeunload`; host apps do not need custom unload handlers.
 - Do not manually emit duplicate `session_start` unless you intentionally also track a separate custom launch event (for example `app_launch`).
 - In React Native/Expo, prefer `appVersion` from `expo-application` (`nativeApplicationVersion`); nullable values can be passed directly.
 - Do not specify `dedupeOnboardingStepViewsPerSession` in generated host-app code by default; SDK default is `true`. Only set it explicitly when the user requests a different behavior or asks for explicit config.
@@ -202,12 +204,26 @@ import { init } from '@analyticscli/sdk';
 const analytics = init({
   apiKey: process.env.NEXT_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY ?? '',
   platform: 'web',
+  projectSurface: 'app',
   identityTrackingMode: 'consent_gated', // default
 });
 ```
 
 `init(...)` is preferred for host apps.
 Resolve env values in app code and pass `apiKey` explicitly.
+
+For Vite/Astro:
+
+```ts
+import { init } from '@analyticscli/sdk';
+
+const analytics = init({
+  apiKey: import.meta.env.VITE_ANALYTICSCLI_PUBLISHABLE_API_KEY ?? '',
+  platform: 'web',
+  projectSurface: 'app',
+  identityTrackingMode: 'consent_gated', // default
+});
+```
 
 ## React Native Setup
 

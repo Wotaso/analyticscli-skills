@@ -28,9 +28,16 @@ import { init } from '@analyticscli/sdk';
 export const analytics = init({
   apiKey: process.env.NEXT_PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY ?? '',
   platform: 'web',
+  projectSurface: 'app',
   identityTrackingMode: 'consent_gated', // default
 });
 ```
+
+For Vite/Astro, use `import.meta.env.VITE_ANALYTICSCLI_PUBLISHABLE_API_KEY`.
+For SvelteKit, use `PUBLIC_ANALYTICSCLI_PUBLISHABLE_API_KEY`.
+Do not generate `*WRITE_KEY*` fallback chains.
+The browser SDK flushes on `pagehide`, hidden `visibilitychange`, and `beforeunload`,
+so host apps should not add custom unload flush handlers by default.
 
 ## Bootstrap Template (React Native / Expo)
 
