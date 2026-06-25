@@ -3,7 +3,7 @@ name: analyticscli-ts-sdk
 description: Use when integrating or upgrading the AnalyticsCLI TypeScript SDK in web, TypeScript, React Native, or Expo apps.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.6.10","analyticscli-target":"@analyticscli/sdk","analyticscli-supported-range":">=0.1.0-preview.6 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/analyticscli-skills"}}
+metadata: {"author":"wotaso","version":"1.6.11","analyticscli-target":"@analyticscli/sdk","analyticscli-supported-range":">=0.1.1 <0.2.0","openclaw":{"emoji":"🧩","homepage":"https://github.com/wotaso/analyticscli-skills"}}
 ---
 
 # AnalyticsCLI TypeScript SDK
@@ -17,9 +17,9 @@ metadata: {"author":"wotaso","version":"1.6.10","analyticscli-target":"@analytic
 
 ## Supported Versions
 
-- Skill pack: `1.6.10`
+- Skill pack: `1.6.11`
 - Target package: `@analyticscli/sdk`
-- Supported range: `>=0.1.0-preview.6 <0.2.0`
+- Supported range: `>=0.1.1 <0.2.0`
 - If a future SDK major changes APIs or event contracts in incompatible ways, add a sibling skill such as `analyticscli-ts-sdk-v1`
 
 See [Versioning Notes](references/versioning.md).
@@ -28,8 +28,8 @@ See [Versioning Notes](references/versioning.md).
 
 When SDK setup, instrumentation, ingestion, docs, or validation behavior is broken or missing:
 
-1. Refetch this skill and upgrade `@analyticscli/sdk` to the newest compatible preview first.
-2. If CLI validation is involved, also update `@analyticscli/cli@preview` and verify `analyticscli --help`.
+1. Refetch this skill and upgrade `@analyticscli/sdk` to the newest compatible release first.
+2. If CLI validation is involved, also update `@analyticscli/cli` and verify `analyticscli --help`.
 3. Rerun the smallest host-app or CLI repro.
 4. If no newer version is available, the update cannot be applied, or the newest version still fails, submit sanitized AnalyticsCLI product feedback with `analyticscli feedback submit`.
 
@@ -43,7 +43,7 @@ ANALYTICSCLI_CLI_ENABLE_WRITE_COMMANDS=true analyticscli feedback submit \
   --message "SDK ingestion validation fails after latest compatible upgrade" \
   --origin-name "analyticscli-ts-sdk skill" \
   --location-id "analyticscli-ts-sdk/error-recovery" \
-  --context "sdk=@analyticscli/sdk@preview skill=analyticscli-ts-sdk@latest cli=@analyticscli/cli@preview flow=<sanitized_flow> workaround=<workaround>" \
+  --context "sdk=@analyticscli/sdk skill=analyticscli-ts-sdk@latest cli=@analyticscli/cli flow=<sanitized_flow> workaround=<workaround>" \
   --meta '{"expected":"<expected behavior>","actual":"<actual behavior>"}'
 ```
 
@@ -93,7 +93,7 @@ ANALYTICSCLI_CLI_ENABLE_WRITE_COMMANDS=true analyticscli feedback submit \
 - For touched paywall/purchase/onboarding flows, use canonical AnalyticsCLI event names only.
 - For generated docs or README snippets, write from tenant developer perspective (`your app`, `your workspace`) and avoid provider-centric phrasing such as `our SaaS`.
 - Default to canonical SDK event names at call sites.
-- Before generating host-app code, ensure `@analyticscli/sdk` is upgraded to the newest preview in that repo.
+- Before generating host-app code, ensure `@analyticscli/sdk` is upgraded to the newest release in that repo.
 - For onboarding instrumentation, use dedicated SDK onboarding APIs instead of generic `track(...)`/`trackEvent(...)`:
   `createOnboardingTracker(...)`, `trackOnboardingEvent(...)`, `trackOnboardingSurveyResponse(...)`,
   plus step helpers (`step(...).view()`, `step(...).complete()`, `step(...).surveyResponse(...)`).
@@ -125,7 +125,9 @@ When helping a developer set up the SDK, make the flow guided and verifiable.
 - Always include both a stable `locationId` and a human-readable `originName`.
 - `locationId` should stay code-stable (`settings/restore`, `onboarding/paywall`).
 - `originName` should explain the exact product surface or UI origin (`restore purchases footer`, `paywall dismiss modal`).
-- For AnalyticsCLI-backed feedback, point `feedback.serviceUrl` at the AnalyticsCLI API or a tenant-owned proxy and use a project-scoped public feedback key. `appId` is optional unless the target endpoint requires it.
+- For AnalyticsCLI-backed feedback that should appear in the dashboard User Feedback view, SDK versions with the feedback default use the AnalyticsCLI API automatically. On older SDK versions, configure `feedback.serviceUrl` explicitly. Override `feedback.serviceUrl` only for a tenant-owned proxy or external service. `appId` is optional unless the target endpoint requires it.
+- Do not treat SDK `submitFeedback(...)` returning `delivery: 'analytics_only'` as stored qualitative feedback. That mode only emits a lightweight analytics event and does not create a feedback-store row for the dashboard Feedback view.
+- If host code already tracks a post-submit `feedback:submitted` analytics event after a successful stored feedback submission, set `feedback.trackEvents: false` in SDK config to avoid duplicate `feedback:submitted` events.
 - Do not put privileged feedback secrets into mobile binaries.
 
 ## Host App Minimalism Guardrails
@@ -186,6 +188,7 @@ Before finishing, verify the generated integration code meets all checks:
 17. touched onboarding survey milestones use `trackOnboardingSurveyResponse(...)` (or tracker survey helpers), not ad-hoc generic `track(...)` payloads
 18. touched React Native / Expo non-onboarding screens use `useFocusEffect(...)` + `analytics.screen(...)` with one owner per route transition
 19. touched onboarding flows do not force `onboarding:step_complete` on every step; default to `onboarding:step_view` and add `step_complete` only where completion semantics are explicit
+20. if touched feedback should appear in the dashboard Feedback view, SDK bootstrap or SDK defaults provide a real feedback endpoint and public feedback key, call sites pass stable `locationId`/`originName`, and the flow does not rely on `analytics_only` delivery
 
 ## Dashboard Credentials Checklist
 

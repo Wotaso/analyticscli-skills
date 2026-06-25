@@ -3,7 +3,7 @@ name: analyticscli-cli
 description: Use AnalyticsCLI CLI as the deterministic, bounded interface for analytics queries, exports, and SDK validation in coding-agent workflows.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.0.5","analyticscli-target":"@analyticscli/cli","analyticscli-supported-range":">=0.1.2-preview.0 <0.2.0","openclaw":{"emoji":"📈","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["analyticscli"]},"install":[{"id":"npm","kind":"node","package":"@analyticscli/cli@preview","bins":["analyticscli"],"label":"Install/update AnalyticsCLI CLI (npm package @analyticscli/cli@preview)"}]}}
+metadata: {"author":"wotaso","version":"1.0.6","analyticscli-target":"@analyticscli/cli","analyticscli-supported-range":">=0.1.3 <0.2.0","openclaw":{"emoji":"📈","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["analyticscli"]},"install":[{"id":"npm","kind":"node","package":"@analyticscli/cli","bins":["analyticscli"],"label":"Install/update AnalyticsCLI CLI (npm package @analyticscli/cli)"}]}}
 ---
 
 # AnalyticsCLI CLI
@@ -17,9 +17,9 @@ metadata: {"author":"wotaso","version":"1.0.5","analyticscli-target":"@analytics
 
 ## Supported Versions
 
-- Skill pack: `1.0.5`
-- Target package: `@analyticscli/cli@preview`
-- Supported range: `>=0.1.2-preview.0 <0.2.0`
+- Skill pack: `1.0.6`
+- Target package: `@analyticscli/cli`
+- Supported range: `>=0.1.3 <0.2.0`
 - If a future CLI major changes commands or flags in incompatible ways, split to a sibling skill such as `analyticscli-cli-v1`
 
 See [Versioning Notes](references/versioning.md).
@@ -53,7 +53,7 @@ Recommended update check:
 
 ```bash
 npx -y skills add wotaso/analyticscli-skills --skill analyticscli-cli
-npm install -g @analyticscli/cli@preview || npm install -g --prefix "$HOME/.local" @analyticscli/cli@preview
+npm install -g @analyticscli/cli || npm install -g --prefix "$HOME/.local" @analyticscli/cli
 export PATH="$HOME/.local/bin:$HOME/.local/analyticscli-npm/bin:$PATH"
 analyticscli --help
 ```
@@ -112,9 +112,9 @@ Before running setup, collect required values from your dashboard:
 Preferred:
 
 ```bash
-npm install -g @analyticscli/cli@preview
+npm install -g @analyticscli/cli
 command -v analyticscli
-npx -y @analyticscli/cli@preview setup
+npx -y @analyticscli/cli setup
 # Paste readonly token only when prompted; do not pass token as a command argument.
 ```
 
@@ -131,7 +131,7 @@ If `analyticscli: command not found`, install or update the npm package. The pac
 Do not search npm for `analyticscli` or `analyticsscli`.
 
 ```bash
-npm install -g @analyticscli/cli@preview
+npm install -g @analyticscli/cli
 analyticscli --help
 ```
 
@@ -139,7 +139,7 @@ On VPS hosts where global npm installs are blocked, use a user-local prefix:
 
 ```bash
 mkdir -p "$HOME/.local"
-npm install -g --prefix "$HOME/.local" @analyticscli/cli@preview
+npm install -g --prefix "$HOME/.local" @analyticscli/cli
 export PATH="$HOME/.local/bin:$HOME/.local/analyticscli-npm/bin:$PATH"
 analyticscli --help
 ```
@@ -149,7 +149,7 @@ After every skill update, also update the npm package and verify the binary:
 
 ```bash
 npx -y skills add wotaso/analyticscli-skills --skill analyticscli-cli
-npm install -g @analyticscli/cli@preview || npm install -g --prefix "$HOME/.local" @analyticscli/cli@preview
+npm install -g @analyticscli/cli || npm install -g --prefix "$HOME/.local" @analyticscli/cli
 export PATH="$HOME/.local/bin:$HOME/.local/analyticscli-npm/bin:$PATH"
 command -v analyticscli
 analyticscli --help
