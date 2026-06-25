@@ -3,7 +3,7 @@ name: analyticscli-cli
 description: Use AnalyticsCLI CLI as the deterministic, bounded interface for analytics queries, exports, and SDK validation in coding-agent workflows.
 license: MIT
 homepage: https://github.com/wotaso/analyticscli-skills
-metadata: {"author":"wotaso","version":"1.0.6","analyticscli-target":"@analyticscli/cli","analyticscli-supported-range":">=0.1.3 <0.2.0","openclaw":{"emoji":"📈","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["analyticscli"]},"install":[{"id":"npm","kind":"node","package":"@analyticscli/cli","bins":["analyticscli"],"label":"Install/update AnalyticsCLI CLI (npm package @analyticscli/cli)"}]}}
+metadata: {"author":"wotaso","version":"1.0.7","analyticscli-target":"@analyticscli/cli","analyticscli-supported-range":">=0.1.3 <0.2.0","openclaw":{"emoji":"📈","homepage":"https://github.com/wotaso/analyticscli-skills","requires":{"bins":["analyticscli"]},"install":[{"id":"npm","kind":"node","package":"@analyticscli/cli","bins":["analyticscli"],"label":"Install/update AnalyticsCLI CLI (npm package @analyticscli/cli)"}]}}
 ---
 
 # AnalyticsCLI CLI
@@ -17,7 +17,7 @@ metadata: {"author":"wotaso","version":"1.0.6","analyticscli-target":"@analytics
 
 ## Supported Versions
 
-- Skill pack: `1.0.6`
+- Skill pack: `1.0.7`
 - Target package: `@analyticscli/cli`
 - Supported range: `>=0.1.3 <0.2.0`
 - If a future CLI major changes commands or flags in incompatible ways, split to a sibling skill such as `analyticscli-cli-v1`

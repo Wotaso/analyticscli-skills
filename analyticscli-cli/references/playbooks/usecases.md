@@ -174,6 +174,8 @@ Retention D1, D7, D30 for onboarding cohort:
 analyticscli retention --anchor-event onboarding:start --days 1,7,30 --last 60d --max-age-days 90 --format text
 ```
 
+Retention defaults to stable identity. This removes ephemeral/unknown SDK identities from multi-day retention so users without full-tracking consent do not make D1/D7 look like product churn. Use `--identity-quality all` only for diagnostic comparison.
+
 Retention D1, D3, D7, D14, D30 for install cohort:
 
 ```bash
